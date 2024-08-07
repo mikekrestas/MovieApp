@@ -85,7 +85,7 @@ const buttonStyle: React.CSSProperties = {
   border: 'none',
   borderRadius: '4px',
   cursor: 'pointer',
-  width: '100%',
+  width: '300px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -97,7 +97,7 @@ const googleButtonStyle: React.CSSProperties = {
   color: '#000',
   border: '1px solid #ccc',
   marginTop: '10px', // Ensure margin consistency
-  width: '33%',
+  width: '300px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

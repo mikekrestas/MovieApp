@@ -57,7 +57,15 @@ const containerStyle: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  marginTop: '50px',
+  justifyContent: 'center',
+  height: '100vh',
+};
+
+const formStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  width: '300px', // Ensure form width consistency
 };
 
 const inputStyle: CSSProperties = {
@@ -74,6 +82,7 @@ const buttonStyle: CSSProperties = {
   borderRadius: '4px',
   border: 'none',
   backgroundColor: '#007bff',
+  width: "300px",
   color: 'white',
   cursor: 'pointer',
 };
@@ -81,13 +90,16 @@ const buttonStyle: CSSProperties = {
 const googleButtonStyle: CSSProperties = {
   padding: '10px 20px',
   margin: '10px 0',
+  color: '#000',
   borderRadius: '4px',
   border: 'none',
-  backgroundColor: '#4285F4',
-  color: 'white',
+  marginTop: '10px', // Ensure margin consistency
+  width: "300px",
+  backgroundColor: '#fff',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
+  justifyContent: 'center',
 };
 
 export default SignUp;

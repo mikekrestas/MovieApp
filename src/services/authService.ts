@@ -1,8 +1,10 @@
 // src/services/authService.ts
-import { auth, db } from '../firebase';
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth, db, storage } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup, User, updateProfile as firebaseUpdateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import { Movie } from '../types';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+
 
 const validateMovie = (movie: Partial<Movie>): Movie => {
   return {
@@ -64,4 +66,24 @@ export const loginWithGoogle = (): Promise<UserCredential> => {
 
 export const logout = (): Promise<void> => {
   return firebaseSignOut(auth);
+};
+
+export const updateProfilePicture = async (user: User, file: File): Promise<string> => {
+  if (!user) {
+    throw new Error('No user is logged in');
+  }
+
+  // Create a reference to the file in Firebase Storage
+  const fileRef = ref(storage, `profile_pictures/${user.uid}/${file.name}`);
+  
+  // Upload the file
+  await uploadBytes(fileRef, file);
+
+  // Get the download URL
+  const photoURL = await getDownloadURL(fileRef);
+
+  // Update the user's profile
+  await firebaseUpdateProfile(user, { photoURL });
+
+  return photoURL;
 };

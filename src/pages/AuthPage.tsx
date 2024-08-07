@@ -1,4 +1,3 @@
-// src/pages/AuthPage.tsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signUp, login, loginWithGoogle } from '../services/authService';
@@ -43,6 +42,8 @@ const AuthPage: React.FC = () => {
     padding: '2rem',
     border: '1px solid #ccc',
     borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    background: '#fff',
   };
 
   const buttonStyle: CSSProperties = {
@@ -52,18 +53,39 @@ const AuthPage: React.FC = () => {
     padding: '10px 20px',
     border: 'none',
     borderRadius: '5px',
-    background: '#4285F4',
-    color: 'white',
     cursor: 'pointer',
     marginTop: '10px',
+    fontSize: '16px',
+    fontWeight: 'bold' as 'bold',
+    width: '100%',
+  };
+
+  const googleButtonStyle: CSSProperties = {
+    ...buttonStyle,
+    background: '#db4437',
+    color: 'white',
   };
 
   const iconStyle: CSSProperties = {
     marginRight: '10px',
   };
 
+  const inputStyle: CSSProperties = {
+    width: '100%',
+    padding: '10px',
+    marginBottom: '15px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+  };
+
+  const linkStyle: CSSProperties = {
+    color: '#007bff',
+    textDecoration: 'none',
+    cursor: 'pointer',
+  };
+
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f4f4f4' }}>
       <div style={containerStyle}>
         <h1>{isSignUp ? 'Sign Up' : 'Login'}</h1>
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -71,7 +93,7 @@ const AuthPage: React.FC = () => {
             <input
               type="text"
               placeholder="Username"
-              style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+              style={inputStyle}
               required
             />
           )}
@@ -80,7 +102,7 @@ const AuthPage: React.FC = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+            style={inputStyle}
             required
           />
           <input
@@ -88,28 +110,28 @@ const AuthPage: React.FC = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
+            style={inputStyle}
             required
           />
           <button type="submit" style={{ ...buttonStyle, background: '#34A853' }}>
             {isSignUp ? 'Sign Up' : 'Login'}
           </button>
         </form>
-        <button onClick={handleGoogleSignIn} style={buttonStyle}>
+        <button onClick={handleGoogleSignIn} style={googleButtonStyle}>
           <FcGoogle style={iconStyle} /> {isSignUp ? 'Sign Up with Google' : 'Login with Google'}
         </button>
-        <p style={{ marginTop: '10px' }}>
+        <p style={{ marginTop: '20px' }}>
           {isSignUp ? (
             <>
               Already have an account?{' '}
-              <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => setIsSignUp(false)}>
+              <span style={linkStyle} onClick={() => setIsSignUp(false)}>
                 Login here
               </span>
             </>
           ) : (
             <>
               Don't have an account?{' '}
-              <span style={{ color: 'blue', cursor: 'pointer' }} onClick={() => setIsSignUp(true)}>
+              <span style={linkStyle} onClick={() => setIsSignUp(true)}>
                 Sign up here
               </span>
             </>

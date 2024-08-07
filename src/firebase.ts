@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -18,6 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const storage = getStorage(app);
 const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
@@ -29,4 +31,4 @@ enableIndexedDbPersistence(db).catch((err) => {
   }
 });
 
-export { auth, googleProvider, db };
+export { auth, googleProvider, db, storage };
