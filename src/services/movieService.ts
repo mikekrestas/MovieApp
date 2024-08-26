@@ -11,6 +11,16 @@ interface ApiMovie {
   Plot: string;
   Released: string;
   Poster: string;
+  Genre: string;
+  Director: string;
+  Actors: string;
+  Runtime: string;
+  Rated: string;
+  Language: string;
+  Country: string;
+  imdbRating: string;
+  BoxOffice: string;
+  Production: string;
 }
 
 const transformApiMovie = (apiMovie: ApiMovie): Movie => ({
@@ -19,6 +29,16 @@ const transformApiMovie = (apiMovie: ApiMovie): Movie => ({
   description: apiMovie.Plot || 'No Description',
   releaseDate: apiMovie.Released || 'Unknown Release Date',
   posterPath: apiMovie.Poster || 'No Poster',
+  genre: apiMovie.Genre || 'No Genre',
+  director: apiMovie.Director || 'No Director',
+  actors: apiMovie.Actors || 'No Actors',
+  runtime: apiMovie.Runtime || 'No Runtime',
+  rating: apiMovie.Rated || 'No Rating',
+  language: apiMovie.Language || 'No Language',
+  country: apiMovie.Country || 'No Country',
+  imdbRating: apiMovie.imdbRating || 'No IMDb Rating',
+  boxOffice: apiMovie.BoxOffice || 'No Box Office Data',
+  production: apiMovie.Production || 'No Production Data',
 });
 
 export const getMovies = async (): Promise<Movie[]> => {
@@ -58,6 +78,7 @@ export const fetchMovieDetails = async (id: string): Promise<Movie> => {
       params: {
         apikey: API_KEY,
         i: id,
+        plot: 'full',  // This ensures the full plot description is returned
       },
     });
 
@@ -78,7 +99,10 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
     });
 
     if (response.data.Search) {
-      return response.data.Search.map(transformApiMovie);
+      const movies = response.data.Search.map(transformApiMovie);
+      // Fetch full details for each movie
+      const fullDetailsPromises = movies.map(movie => fetchMovieDetails(movie.id));
+      return Promise.all(fullDetailsPromises);
     } else {
       throw new Error('No search results found');
     }

@@ -4,4 +4,15 @@ export interface Movie {
   description: string;
   releaseDate: string;
   posterPath: string;
+  genre: string;
+  director: string;
+  actors: string;
+  runtime: string;
+  rating: string;
+  language: string;
+  country: string;
+  imdbRating: string;
+  boxOffice: string;
+  production: string;
 }
+

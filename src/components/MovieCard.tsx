@@ -13,7 +13,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     navigate(`/movie/${movie.id}`);
   };
 
-  const cardStyle = {
+  const cardStyle: React.CSSProperties = {
     border: '1px solid #ddd',
     borderRadius: '8px',
     overflow: 'hidden',
@@ -21,24 +21,26 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     margin: '16px',
     cursor: 'pointer',
     boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-    textAlign: 'center' as 'center',
+    textAlign: 'center',
+    backgroundColor: '#fff',
   };
 
-  const imgStyle = {
+  const imgStyle: React.CSSProperties = {
     width: '100%',
     height: '300px',
-    objectFit: 'cover' as 'cover',
+    objectFit: 'cover',
   };
 
-  const titleStyle = {
+  const titleStyle: React.CSSProperties = {
     fontSize: '16px',
-    fontWeight: 'bold' as 'bold',
+    fontWeight: 'bold',
     margin: '8px 0',
+    color: '#333',
   };
 
   return (
     <div style={cardStyle} onClick={handleCardClick}>
-      <img src={movie.posterPath} alt={movie.title} style={imgStyle} />
+      <img src={movie.posterPath || 'https://via.placeholder.com/200x300'} alt={movie.title} style={imgStyle} />
       <div style={titleStyle}>{movie.title}</div>
     </div>
   );

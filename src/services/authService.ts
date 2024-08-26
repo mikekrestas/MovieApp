@@ -13,6 +13,16 @@ const validateMovie = (movie: Partial<Movie>): Movie => {
     description: movie.description || 'No Description',
     releaseDate: movie.releaseDate || 'Unknown',
     posterPath: movie.posterPath || '',
+    genre: movie.genre || 'No Genre',
+    director: movie.director || 'No Director',
+    actors: movie.actors || 'No Actors',
+    runtime: movie.runtime || 'No Runtime',
+    rating: movie.rating || 'No Rating',
+    language: movie.language || 'No Language',
+    country: movie.country || 'No Country',
+    imdbRating: movie.imdbRating || 'No IMDb Rating',
+    boxOffice: movie.boxOffice || 'No Box Office Data',
+    production: movie.production || 'No Production Data',
   };
 };
 
