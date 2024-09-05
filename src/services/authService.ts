@@ -2,7 +2,7 @@
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup, User, updateProfile as firebaseUpdateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
-import { Movie } from '../types';
+import { Movie } from '../types/types';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 

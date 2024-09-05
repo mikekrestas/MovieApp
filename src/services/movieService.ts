@@ -1,6 +1,6 @@
 // src/services/movieService.ts
 import axios from 'axios';
-import { Movie } from '../types';
+import { Movie } from '../types/types';
 
 const API_KEY = '88e8fc3';
 const BASE_URL = 'http://www.omdbapi.com/';

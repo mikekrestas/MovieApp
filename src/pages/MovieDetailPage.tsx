@@ -1,23 +1,43 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Movie } from '../types';
+import { Movie } from '../types/types';
 import { addFavorite, removeFavorite } from '../services/authService';
 import { User } from 'firebase/auth';
-import { CSSProperties } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
 
 interface MovieDetailPageProps {
   user: User | null;
   favorites: Movie[];
   setFavorites: (movies: Movie[]) => void;
   movies: Movie[];
+  searchResults?: Movie[];
 }
 
-const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies }) => {
+const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults }) => {
   const { id } = useParams<{ id: string }>();
-  const movie = movies.find(movie => movie.id === id);
+
+  // Combine movies and searchResults
+  const combinedMovies = [...movies, ...(searchResults || [])];
+
+  // Find the movie from combinedMovies
+  const movie = combinedMovies.find(m => m.id === id);
+
+  // Debugging: Log the movie ID from the URL
+  console.log('Movie ID from URL:', id);
+
+  // Debugging: Log the IDs of combined movies
+  console.log('Logging all combined movie IDs:');
+  combinedMovies.forEach(movie => {
+    console.log(`Movie ID: ${movie.id}, Title: ${movie.title}`);
+  });
 
   if (!movie) {
-    return <div style={notFoundStyle}>Movie not found</div>;
+    console.error(`No movie found with ID: ${id}`);
+    return (
+      <div className="text-center text-white my-5">
+        <h1>Movie not found</h1>
+      </div>
+    );
   }
 
   const isFavorite = favorites.some(favorite => favorite.id === movie.id);
@@ -38,89 +58,44 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={movieCardStyle}>
-        <h1 style={titleStyle}>{movie.title}</h1>
-        <img src={movie.posterPath} alt={movie.title} style={imageStyle} />
-        <div style={detailsStyle}>
-          <p><strong>Release Date:</strong> {movie.releaseDate}</p>
-          <p><strong>Genre:</strong> {movie.genre}</p>
-          <p><strong>Director:</strong> {movie.director}</p>
-          <p><strong>Actors:</strong> {movie.actors}</p>
-          <p><strong>Runtime:</strong> {movie.runtime}</p>
-          <p><strong>IMDb Rating:</strong> {movie.imdbRating}</p>
-          <p><strong>Plot:</strong> {movie.description}</p>
-          <p><strong>Box Office:</strong> {movie.boxOffice}</p>
-          <p><strong>Production:</strong> {movie.production}</p>
+    <div className="d-flex flex-column min-vh-100 bg-dark text-white">
+      <div className="container my-5 flex-grow-1 d-flex flex-column justify-content-center">
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div className="card bg-dark text-white border-0">
+              <img
+                src={movie.posterPath || 'https://via.placeholder.com/400x600'}
+                alt={movie.title}
+                className="card-img-top"
+                style={{ width: '100%', maxWidth: '300px', borderRadius: '8px' }}
+              />
+              <div className="card-body">
+                <h1 className="card-title mb-4">{movie.title || 'Title not available'}</h1>
+                <div className="mb-4">
+                  <p><strong>Release Date:</strong> {movie.releaseDate || 'N/A'}</p>
+                  <p><strong>Genre:</strong> {movie.genre || 'N/A'}</p>
+                  <p><strong>Director:</strong> {movie.director || 'N/A'}</p>
+                  <p><strong>Actors:</strong> {movie.actors || 'N/A'}</p>
+                  <p><strong>Runtime:</strong> {movie.runtime || 'N/A'}</p>
+                  <p><strong>IMDb Rating:</strong> {movie.imdbRating || 'N/A'}</p>
+                  <p><strong>Box Office:</strong> {movie.boxOffice || 'N/A'}</p>
+                  <p><strong>Production:</strong> {movie.production || 'N/A'}</p>
+                </div>
+                <h2 className="mb-3">Plot</h2>
+                <p className="card-text">{movie.description || 'No plot available'}</p>
+                <button
+                  onClick={handleFavorite}
+                  className={`btn ${isFavorite ? 'btn-danger' : 'btn-primary'} btn-lg`}
+                >
+                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <button onClick={handleFavorite} style={buttonStyle}>
-          {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-        </button>
       </div>
     </div>
   );
-};
-
-// Styles
-
-const containerStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '100vh',
-  backgroundColor: '#282c34',
-  padding: '20px',
-  boxSizing: 'border-box', // Ensures padding doesn't cause overflow
-};
-
-const movieCardStyle: CSSProperties = {
-  backgroundColor: '#1e1e30',
-  padding: '20px',
-  borderRadius: '8px',
-  boxShadow: '0 0 20px rgba(0, 0, 0, 0.3)',
-  maxWidth: '90%', // Adjusted to fit within the screen
-  width: '600px', // Adjust width to be reasonable for most screens
-  textAlign: 'left',
-  color: 'white',
-  boxSizing: 'border-box', // Ensures padding doesn't cause overflow
-  overflow: 'hidden', // Hide any overflow content
-};
-
-const titleStyle: CSSProperties = {
-  fontSize: '24px',
-  marginBottom: '10px',
-  color: '#fff',
-};
-
-const imageStyle: CSSProperties = {
-  width: '100%',
-  maxWidth: '400px',
-  borderRadius: '8px',
-  marginBottom: '20px',
-};
-
-const detailsStyle: CSSProperties = {
-  marginBottom: '20px',
-};
-
-const buttonStyle: CSSProperties = {
-  padding: '10px 20px',
-  backgroundColor: '#007bff',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  fontSize: '16px',
-};
-
-// Not found style
-const notFoundStyle: CSSProperties = {
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  minHeight: '100vh',
-  fontSize: '24px',
-  color: '#fff',
 };
 
 export default MovieDetailPage;

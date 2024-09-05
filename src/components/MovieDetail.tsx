@@ -1,7 +1,7 @@
 // src/components/MovieDetail.tsx
 
 import React from 'react';
-import { Movie } from '../types';
+import { Movie } from '../types/types';
 
 interface MovieDetailProps {
   movie: Movie;

@@ -11,8 +11,10 @@ import ProfilePage from './pages/ProfilePage';
 import { auth } from './firebase';
 import { getFavorites } from './services/authService';
 import { fetchMovies, searchMovies } from './services/movieService';
-import { Movie } from './types';
+import { Movie } from './types/types';
 import { User } from 'firebase/auth';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
