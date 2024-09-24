@@ -11,7 +11,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/movie/${movie.id}`);
+    navigate(`/movie/${movie.movie_id}`);
   };
 
   return (
@@ -22,9 +22,6 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
         className="card-img-top"
         style={{ height: '300px', objectFit: 'cover' }}
       />
-      <div className="card-body text-center">
-        {/* <h5 className="card-title">{movie.title}</h5> */}
-      </div>
     </div>
   );
 };

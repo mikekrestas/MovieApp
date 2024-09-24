@@ -5,26 +5,8 @@ import { Movie } from '../types/types';
 const API_KEY = '88e8fc3';
 const BASE_URL = 'http://www.omdbapi.com/';
 
-interface ApiMovie {
-  imdbID: string;
-  Title: string;
-  Plot: string;
-  Released: string;
-  Poster: string;
-  Genre: string;
-  Director: string;
-  Actors: string;
-  Runtime: string;
-  Rated: string;
-  Language: string;
-  Country: string;
-  imdbRating: string;
-  BoxOffice: string;
-  Production: string;
-}
-
-const transformApiMovie = (apiMovie: ApiMovie): Movie => ({
-  id: apiMovie.imdbID || '',
+const transformApiMovie = (apiMovie: any): Movie => ({
+  movie_id: apiMovie.imdbID || '',
   title: apiMovie.Title || 'No Title',
   description: apiMovie.Plot || 'No Description',
   releaseDate: apiMovie.Released || 'Unknown Release Date',
@@ -43,18 +25,12 @@ const transformApiMovie = (apiMovie: ApiMovie): Movie => ({
 
 export const getMovies = async (): Promise<Movie[]> => {
   const response = await axios.get(BASE_URL);
-  return response.data.map((apiMovie: any) => ({
-    id: apiMovie.id,
-    title: apiMovie.title,
-    description: apiMovie.description,
-    releaseDate: apiMovie.releaseDate,
-    posterPath: apiMovie.posterPath,
-  }));
+  return response.data.map((apiMovie: any) => transformApiMovie(apiMovie));
 };
 
 export const fetchMovies = async (): Promise<Movie[]> => {
   try {
-    const response = await axios.get<{ Search: ApiMovie[] }>(BASE_URL, {
+    const response = await axios.get<{ Search: any[] }>(BASE_URL, {
       params: {
         apikey: API_KEY,
         s: 'Avengers', // Change to a known title to ensure results
@@ -72,26 +48,29 @@ export const fetchMovies = async (): Promise<Movie[]> => {
   }
 };
 
-export const fetchMovieDetails = async (id: string): Promise<Movie> => {
+export const fetchMovieDetails = async (movie_id: string): Promise<Movie> => {
   try {
-    const response = await axios.get<ApiMovie>(BASE_URL, {
+    console.log(`Fetching details for movie ID: ${movie_id}`);
+    const response = await axios.get(BASE_URL, {
       params: {
         apikey: API_KEY,
-        i: id,
-        plot: 'full',  // This ensures the full plot description is returned
+        i: movie_id,
+        plot: 'full',
       },
     });
 
-    return transformApiMovie(response.data);
+    const movie = transformApiMovie(response.data);
+    console.log('Fetched movie details:', movie);
+    return movie;
   } catch (error) {
-    console.error(`Error fetching details for movie ID ${id}:`, error);
+    console.error(`Error fetching details for movie ID ${movie_id}:`, error);
     throw error;
   }
 };
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
   try {
-    const response = await axios.get<{ Search: ApiMovie[] }>(BASE_URL, {
+    const response = await axios.get<{ Search: any[] }>(BASE_URL, {
       params: {
         apikey: API_KEY,
         s: query,
@@ -101,7 +80,7 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
     if (response.data.Search) {
       const movies = response.data.Search.map(transformApiMovie);
       // Fetch full details for each movie
-      const fullDetailsPromises = movies.map(movie => fetchMovieDetails(movie.id));
+      const fullDetailsPromises = movies.map(movie => fetchMovieDetails(movie.movie_id));
       return Promise.all(fullDetailsPromises);
     } else {
       throw new Error('No search results found');

@@ -1,84 +1,64 @@
-import os
-import requests
 from flask import Flask, request, jsonify
-from transformers import pipeline
+import requests
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.tokenize import regexp_tokenize
 
 app = Flask(__name__)
 
-# Load GPT-2 model for text generation
-generator = pipeline('text-generation', model='gpt2')
+OMDB_API_KEY = '88e8fc3'
+OMDB_API_URL = 'http://www.omdbapi.com/'
 
-# Replace this with your OMDb API key, preferably from an environment variable
-OMDB_API_KEY = os.getenv('OMDB_API_KEY', '88e8fc3')
+# Download necessary NLTK data
+import nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('punkt_tab')
+nltk.download('punkt', download_dir='path/to/nltk_data')
 
-def fetch_movie_from_omdb(query):
-    """
-    Fetch movie details from OMDb API based on a search query.
-    """
-    url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&s={query}&type=movie"
-    response = requests.get(url)
+# Initialize stopwords and tokenizer
+stop_words = set(stopwords.words('english'))
+tokenizer = nltk.tokenize.RegexpTokenizer(r'\w+')
+
+def simple_tokenize(text):
+    # Tokenize and remove stopwords
+    tokens = tokenizer.tokenize(text.lower())
+    return tokens
+
+def process_query(query):
+    # Tokenize the query
+    tokens = simple_tokenize(query)
+    filtered_tokens = [word for word in tokens if word not in stop_words]
+    
+    # Construct search term from filtered tokens
+    search_term = ' '.join(filtered_tokens)
+    print(f"Processed search term: {search_term}")  # Debugging line
+
+    # Create search parameters for OMDb API
+    search_params = {
+        's': search_term,
+        'apikey': OMDB_API_KEY
+    }
+    return search_params
+
+@app.route('/top_movies', methods=['GET'])
+def top_movies():
+    query = request.args.get('query', '')
+    print(f"Original query: {query}")  # Debugging line
+
+    # Process the query to create search parameters
+    search_params = process_query(query)
+    print(f"Search parameters: {search_params}")  # Debugging line
+
+    # Perform the API request
+    response = requests.get(OMDB_API_URL, params=search_params)
     data = response.json()
-    
-    if data['Response'] == 'True':
-        movies = data['Search']
-        detailed_movies = []
 
-        for movie in movies:
-            movie_details = fetch_detailed_movie_info(movie['imdbID'])
-            if movie_details:
-                detailed_movies.append(movie_details)
-        
-        unique_movies = {movie['imdbID']: movie for movie in detailed_movies}
-        return list(unique_movies.values())
-    else:
-        return []
+    # Check for errors and format response
+    if 'Error' in data:
+        return jsonify({'error': data['Error']}), 404
 
-def fetch_detailed_movie_info(imdb_id):
-    """
-    Fetch detailed movie information using IMDb ID.
-    """
-    url = f"http://www.omdbapi.com/?apikey={OMDB_API_KEY}&i={imdb_id}&plot=full"
-    response = requests.get(url)
-    return response.json()
-
-def generate_response(query):
-    """
-    Use GPT-2 to generate a response for more complex queries.
-    """
-    result = generator(query, max_length=50, num_return_sequences=1)
-    return result[0]['generated_text']
-
-@app.route('/')
-def home():
-    return 'Welcome to the Movie App!'
-
-@app.route('/favicon.ico')
-def favicon():
-    return '', 204  # No content for favicon
-
-@app.route('/recommend', methods=['GET'])
-def recommend_movies():
-    """
-    Recommend movies based on a user query.
-    """
-    query = request.args.get('query')
-    print(f"Received query: {query}")  # Debug print
-    if not query:
-        return jsonify({'error': 'Query parameter is required'}), 400
-
-    # Generate a more detailed response if needed
-    if 'first movie' in query.lower():
-        # Example specific handling, you can add more conditions
-        response_text = generate_response(query)
-        return jsonify({'response': response_text})
-
-    # Try to fetch movies from OMDb
-    movies = fetch_movie_from_omdb(query)
-    print(f"Movies found: {movies}")  # Debug print
-    if movies:
-        return jsonify(movies)
-    
-    return jsonify({'error': 'No movies found for your query'}), 404
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True)

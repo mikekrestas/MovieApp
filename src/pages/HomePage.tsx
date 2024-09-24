@@ -23,9 +23,9 @@ const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, sear
       <div className="container">
         <div className="row">
           {displayedMovies.map((movie) => (
-            <div key={movie.id} className="col-sm-6 col-md-4 col-lg-3 mb-4 d-flex justify-content-center">
+            <div key={movie.movie_id} className="col-sm-6 col-md-4 col-lg-3 mb-4 d-flex justify-content-center">
               <div className="card bg-secondary text-white h-100" style={{ border: 'none' }}>
-                <Link to={`/movie/${movie.id}`} className="text-white text-decoration-none">
+                <Link to={`/movie/${movie.movie_id}`} className="text-white text-decoration-none">
                   <img 
                     src={movie.posterPath} 
                     alt={movie.title} 

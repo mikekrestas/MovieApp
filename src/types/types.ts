@@ -1,18 +1,18 @@
+// Example Movie type definition
 export interface Movie {
-  id: string;
+  movie_id: string;
   title: string;
   description: string;
   releaseDate: string;
   posterPath: string;
-  genre: string;
   director: string;
   actors: string;
-  runtime: string;
-  rating: string;
-  language: string;
-  country: string;
+  genre: string;
   imdbRating: string;
-  boxOffice: string;
+  language: string;
   production: string;
+  runtime: string;
+  rating?: string; // Optional properties can be included
+  country?: string; // Optional properties can be included
+  boxOffice?: string; // Optional properties can be included
 }
-
