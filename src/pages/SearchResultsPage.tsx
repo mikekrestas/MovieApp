@@ -1,29 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Movie } from '../types/types';
-import { User } from 'firebase/auth';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
-interface HomePageProps {
-  user: User | null;
-  favorites: Movie[];
-  setFavorites: React.Dispatch<React.SetStateAction<Movie[]>>;
-  searchResults?: Movie[]; // Optional prop
-  movies: Movie[];
+interface SearchResultsPageProps {
+  searchResults?: Movie[]; // Make it optional to handle the case where no results are passed
 }
 
-const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, searchResults = [], movies }) => {
-  console.log('HomePage props:', { user, favorites, searchResults, movies });
-
-  // Use searchResults if available, otherwise fall back to movies
-  const displayedMovies = searchResults.length > 0 ? searchResults : movies;
-
+const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ searchResults = [] }) => {
   return (
     <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h1 className="my-5"> </h1>
+      <h1 className="my-5 text-center text-uppercase font-weight-bold" style={{ fontSize: '3rem', color: '#ffcc00' }}>
+        Search Results
+      </h1>
       <div className="container">
         <div className="row">
-          {displayedMovies.map((movie) => (
+          {searchResults.map((movie) => (
             <div key={movie.movie_id} className="col-sm-6 col-md-4 col-lg-3 mb-4 d-flex justify-content-center">
               <div className="card bg-secondary text-white h-100" style={{ border: 'none' }}>
                 <Link to={`/movie/${movie.movie_id}`} className="text-white text-decoration-none">
@@ -48,4 +39,4 @@ const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, sear
   );
 };
 
-export default HomePage;
+export default SearchResultsPage;

@@ -1,7 +1,7 @@
 // src/services/authService.ts
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup, User, updateProfile as firebaseUpdateProfile } from 'firebase/auth';
-import { doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
 import { Movie } from '../types/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -43,20 +43,61 @@ export const removeFavorite = async (userId: string, movieId: string) => {
   await deleteDoc(movieRef);
 };
 
+// Update your getFavorites function
 export const getFavorites = async (userId: string): Promise<Movie[]> => {
   console.log('Fetching favorites for user:', userId);
   try {
-    const userRef = doc(db, 'users', userId);
-    const userDoc = await getDoc(userRef);
-    if (userDoc.exists()) {
-      console.log('Favorites fetched successfully:', userDoc.data().favorites);
-      return userDoc.data().favorites || [];
-    } else {
-      console.log('No favorites found.');
-      return [];
-    }
+    // Reference to the user's favorites subcollection
+    const favoritesRef = collection(db, 'users', userId, 'favorites');
+    const favoritesSnapshot = await getDocs(favoritesRef);
+    const favorites: Movie[] = [];
+    
+    // Iterate over each document in the favorites snapshot
+    favoritesSnapshot.forEach((doc) => {
+      favorites.push(doc.data() as Movie); // Cast to Movie type
+    });
+
+    console.log('Favorites fetched successfully:', favorites);
+    return favorites;
   } catch (error) {
     console.error('Error fetching favorites:', error);
+    throw error;
+  }
+};
+
+// Function to add a movie to the watchlist
+export const addWatchlist = async (userId: string, movie: Partial<Movie>) => {
+  const validMovie = validateMovie(movie);
+  console.log('Adding movie to watchlist:', validMovie);
+  try {
+    const movieRef = doc(db, 'users', userId, 'watchlist', validMovie.movie_id);
+    await setDoc(movieRef, validMovie);
+    console.log('Movie added to watchlist successfully.');
+  } catch (error) {
+    console.error('Error adding movie to watchlist:', error);
+  }
+};
+
+// Function to remove a movie from the watchlist
+export const removeWatchlist = async (userId: string, movieId: string) => {
+  const movieRef = doc(db, 'users', userId, 'watchlist', movieId);
+  await deleteDoc(movieRef);
+};
+
+// Function to get the watchlist
+export const getWatchlist = async (userId: string): Promise<Movie[]> => {
+  console.log('Fetching watchlist for user:', userId);
+  try {
+    const watchlistRef = collection(db, 'users', userId, 'watchlist');
+    const snapshot = await getDocs(watchlistRef);
+    const movies: Movie[] = [];
+    snapshot.forEach(doc => {
+      movies.push(doc.data() as Movie);
+    });
+    console.log('Watchlist fetched successfully:', movies);
+    return movies;
+  } catch (error) {
+    console.error('Error fetching watchlist:', error);
     throw error;
   }
 };

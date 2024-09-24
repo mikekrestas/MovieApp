@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { logout } from '../services/authService';
-import { CSSProperties } from 'react';
+import { Container, Typography, Button, Card, CardContent, Grid } from '@mui/material';
 
 interface ProfilePageProps {
   user: User | null;
@@ -22,31 +22,70 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
   };
 
   return (
-    <div style={containerStyle}>
+    <Container style={containerStyle}>
       {user ? (
         <div style={profileContainerStyle}>
-          <h1 style={headerStyle}>Hi, {user.displayName || 'No Name'}</h1>
+          <Typography variant="h4" style={headerStyle}>
+            Hi, {user.displayName || 'No Name'}
+          </Typography>
           <div style={profileInfoStyle}>
             <img 
               src={user.photoURL || 'https://via.placeholder.com/150'} 
-               
+              alt="Profile"
               style={profileImageStyle} 
             />
-            {/* <div style={infoStyle}>
-              <p style={infoTextStyle}><strong>Name</strong> {user.displayName || 'No Name'}</p>
-              <p style={infoTextStyle}><strong>Email</strong> {user.email}</p>
-            </div> */}
           </div>
-          <button onClick={handleLogout} style={buttonStyle}>Logout</button>
+          <Grid container spacing={2} justifyContent="center" style={{ marginBottom: '20px' }}>
+            <Grid item xs={12} sm={6}>
+              <Card style={{ backgroundColor: '#333' }}>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom style={{ color: 'white' }}>
+                    Favorites
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    onClick={() => navigate('/favorites')}
+                  >
+                    Go to Favorites
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Card style={{ backgroundColor: '#333' }}>
+                <CardContent>
+                  <Typography variant="h5" gutterBottom style={{ color: 'white' }}>
+                    Watchlist
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    onClick={() => navigate('/watchlist')}
+                  >
+                    Go to Watchlist
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
+          <Button onClick={handleLogout} style={buttonStyle}>
+            Logout
+          </Button>
         </div>
       ) : (
-        <p>No user logged in.</p>
+        <Typography variant="h6" style={{ color: 'white' }}>
+          No user logged in.
+        </Typography>
       )}
-    </div>
+    </Container>
   );
 };
 
-const containerStyle: CSSProperties = {
+// Define styles using React.CSSProperties for proper typing
+const containerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -55,9 +94,9 @@ const containerStyle: CSSProperties = {
   padding: '20px',
 };
 
-const profileContainerStyle: CSSProperties = {
+const profileContainerStyle: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'column', // Change this line
   alignItems: 'center',
   backgroundColor: 'rgb(20, 60, 50)',
   borderRadius: '8px',
@@ -67,20 +106,19 @@ const profileContainerStyle: CSSProperties = {
   maxWidth: '500px',
 };
 
-const headerStyle: CSSProperties = {
+const headerStyle: React.CSSProperties = {
   marginBottom: '20px',
-  fontSize: '24px',
   color: 'white',
 };
 
-const profileInfoStyle: CSSProperties = {
+const profileInfoStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   gap: '20px',
   marginBottom: '20px',
 };
 
-const profileImageStyle: CSSProperties = {
+const profileImageStyle: React.CSSProperties = {
   width: '150px',
   height: '150px',
   borderRadius: '75px',
@@ -88,18 +126,7 @@ const profileImageStyle: CSSProperties = {
   objectFit: 'cover',
 };
 
-const infoStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-};
-
-const infoTextStyle: CSSProperties = {
-  margin: '5px 0',
-  fontSize: '18px',
-  color: 'white',
-};
-
-const buttonStyle: CSSProperties = {
+const buttonStyle: React.CSSProperties = {
   padding: '10px 20px',
   backgroundColor: '#2a2940',
   color: '#fff',

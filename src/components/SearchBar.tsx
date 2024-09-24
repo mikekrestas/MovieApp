@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -7,9 +8,13 @@ interface SearchBarProps {
 
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSearch = () => {
-    onSearch(query);
+    if (query) {
+      onSearch(query); // Call the onSearch function
+      navigate('/search'); // Navigate to the search results page
+    }
   };
 
   return (

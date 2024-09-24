@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
-import { addFavorite, removeFavorite } from '../services/authService';
+import { addFavorite, removeFavorite, addWatchlist, removeWatchlist } from '../services/authService';
 import { User } from 'firebase/auth';
 import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
 
@@ -16,6 +16,7 @@ interface MovieDetailPageProps {
 const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults }) => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null); // Initialize as null
+  const [isInWatchlist, setIsInWatchlist] = useState(false); // New state for watchlist
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -25,7 +26,6 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
         console.log('Fetched Movie Details:', data);
         
         if (data.Response === "True") {
-          // Map the fetched data to your state
           setMovie({
             movie_id: data.imdbID,
             title: data.Title,
@@ -38,8 +38,8 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
             imdbRating: data.imdbRating || 'No IMDb Rating',
             language: data.Language || 'No Language',
             runtime: data.Runtime || 'No Runtime',
-            boxOffice: data.BoxOffice || data.BoxOffice !== "N/A" ? data.BoxOffice : 'Unknown Box Office',
-            production: data.Production || data.Production !== "N/A" ? data.Production : 'Unknown Production',
+            boxOffice: data.BoxOffice !== "N/A" ? data.BoxOffice : 'Unknown Box Office',
+            production: data.Production !== "N/A" ? data.Production : 'Unknown Production',
           });
         } else {
           console.error(`Movie not found: ${data.Error}`);
@@ -96,6 +96,21 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     }
   };
 
+  // Handle adding/removing from watchlist
+  const handleWatchlist = async () => {
+    if (!user) {
+      alert("Please log in to manage your watchlist");
+      return;
+    }
+
+    if (isInWatchlist) {
+      await removeWatchlist(user.uid, displayMovie.movie_id);
+    } else {
+      await addWatchlist(user.uid, displayMovie);
+    }
+    setIsInWatchlist(!isInWatchlist); // Toggle watchlist state
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100 bg-dark text-white">
       <div className="container my-5 flex-grow-1 d-flex flex-column justify-content-center">
@@ -122,11 +137,21 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
                 </div>
                 <h2 className="mb-3">Plot</h2>
                 <p className="card-text">{displayMovie.description || 'No plot available'}</p>
+
+                {/* Favorite Button */}
                 <button
                   onClick={handleFavorite}
                   className={`btn ${isFavorite ? 'btn-danger' : 'btn-primary'} btn-lg`}
                 >
                   {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                </button>
+
+                {/* Watchlist Button */}
+                <button
+                  onClick={handleWatchlist}
+                  className={`btn ${isInWatchlist ? 'btn-warning' : 'btn-secondary'} btn-lg ml-3`}
+                >
+                  {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
                 </button>
               </div>
             </div>

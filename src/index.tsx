@@ -4,7 +4,7 @@ import App from './App';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { createTheme } from '@mui/material/styles';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
+import { BrowserRouter as Router } from 'react-router-dom'; // Import the Router here
 
 const darkTheme = createTheme({
   palette: {
@@ -16,7 +16,9 @@ ReactDOM.render(
   <React.StrictMode>
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <App />
+      <Router> {/* Wrap App with Router */}
+        <App />
+      </Router>
     </ThemeProvider>
   </React.StrictMode>,
   document.getElementById('root')
