@@ -2,91 +2,61 @@
 import axios from 'axios';
 import { Movie } from '../types/types';
 
-const API_KEY = '88e8fc3';
-const BASE_URL = 'http://www.omdbapi.com/';
+const TMDB_API_KEY = 'd6c184f394c5630668e1782d6be5afa4';
+const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
-const transformApiMovie = (apiMovie: any): Movie => ({
-  movie_id: apiMovie.imdbID || '',
-  title: apiMovie.Title || 'No Title',
-  description: apiMovie.Plot || 'No Description',
-  releaseDate: apiMovie.Released || 'Unknown Release Date',
-  posterPath: apiMovie.Poster || 'No Poster',
-  genre: apiMovie.Genre || 'No Genre',
-  director: apiMovie.Director || 'No Director',
-  actors: apiMovie.Actors || 'No Actors',
-  runtime: apiMovie.Runtime || 'No Runtime',
-  rating: apiMovie.Rated || 'No Rating',
-  language: apiMovie.Language || 'No Language',
-  country: apiMovie.Country || 'No Country',
-  imdbRating: apiMovie.imdbRating || 'No IMDb Rating',
-  boxOffice: apiMovie.BoxOffice || 'No Box Office Data',
-  production: apiMovie.Production || 'No Production Data',
+// Transform the TMDB API movie response into your Movie type
+const transformApiMovie = (tmdbMovie: any): Movie => ({
+  movie_id: tmdbMovie.id.toString(),
+  title: tmdbMovie.title || 'No Title',
+  description: tmdbMovie.overview || 'No Description',
+  releaseDate: tmdbMovie.release_date || 'Unknown Release Date',
+  posterPath: `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` || 'No Poster',
+  genre: tmdbMovie.genre_ids.join(', ') || 'No Genre',
+  director: '', // TMDB doesn't provide director info in this endpoint
+  actors: '', // No actor info available in this endpoint
+  runtime: '', // Runtime info is not available in this endpoint
+  imdbRating: tmdbMovie.vote_average.toString() || 'No IMDb Rating',
+  language: tmdbMovie.original_language || 'No Language',
+  production: '', // Not available in the now playing endpoint
 });
 
-export const getMovies = async (): Promise<Movie[]> => {
-  const response = await axios.get(BASE_URL);
-  return response.data.map((apiMovie: any) => transformApiMovie(apiMovie));
-};
-
-export const fetchMovies = async (): Promise<Movie[]> => {
+// Fetch latest movies currently playing in cinemas
+export const fetchLatestMovies = async (): Promise<Movie[]> => {
   try {
-    const response = await axios.get<{ Search: any[] }>(BASE_URL, {
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/now_playing`, {
       params: {
-        apikey: API_KEY,
-        s: 'Avengers', // Change to a known title to ensure results
+        api_key: TMDB_API_KEY,
+        language: 'en-US', // Fetch English movies, you can change as needed
+        page: 1, // Pagination: fetch the first page of results
       },
     });
 
-    if (response.data.Search) {
-      return response.data.Search.map(transformApiMovie);
-    } else {
-      throw new Error('No movies found');
-    }
+    const movies = response.data.results.map(transformApiMovie);
+    return movies;
   } catch (error) {
-    console.error('Error fetching movies:', error);
+    console.error('Error fetching latest movies from TMDB:', error);
     throw error;
   }
 };
 
-export const fetchMovieDetails = async (movie_id: string): Promise<Movie> => {
-  try {
-    console.log(`Fetching details for movie ID: ${movie_id}`);
-    const response = await axios.get(BASE_URL, {
-      params: {
-        apikey: API_KEY,
-        i: movie_id,
-        plot: 'full',
-      },
-    });
-
-    const movie = transformApiMovie(response.data);
-    console.log('Fetched movie details:', movie);
-    return movie;
-  } catch (error) {
-    console.error(`Error fetching details for movie ID ${movie_id}:`, error);
-    throw error;
-  }
-};
+// Other functions like searchMovies can go here...
 
 export const searchMovies = async (query: string): Promise<Movie[]> => {
   try {
-    const response = await axios.get<{ Search: any[] }>(BASE_URL, {
+    const response = await axios.get(`${TMDB_BASE_URL}/search/movie`, {
       params: {
-        apikey: API_KEY,
-        s: query,
+        api_key: TMDB_API_KEY,
+        query: query,
       },
     });
 
-    if (response.data.Search) {
-      const movies = response.data.Search.map(transformApiMovie);
-      // Fetch full details for each movie
-      const fullDetailsPromises = movies.map(movie => fetchMovieDetails(movie.movie_id));
-      return Promise.all(fullDetailsPromises);
-    } else {
-      throw new Error('No search results found');
-    }
+    const movies = response.data.results.map(transformApiMovie);
+    return movies;
   } catch (error) {
-    console.error(`Error searching for movies with query "${query}":`, error);
+    console.error('Error searching movies from TMDB:', error);
     throw error;
   }
 };
+
+

@@ -22,8 +22,16 @@ const Login: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
-      navigate('/');
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Log the user object and photoURL
+      console.log('Logged in User:', user);
+      console.log('Google User Photo URL:', user.photoURL);
+
+      // Optionally, you could also store the user data in your app state or database here
+
+      navigate('/'); // Navigate after successful login
     } catch (error) {
       console.error('Error logging in with Google:', error);
     }

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { logout } from '../services/authService';
-import { Container, Typography, Button, Card, CardContent, Grid } from '@mui/material';
+import { Container, Typography, Button, Card, CardContent, Grid, Avatar } from '@mui/material';
 
 interface ProfilePageProps {
   user: User | null;
@@ -28,18 +28,17 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
           <Typography variant="h4" style={headerStyle}>
             Hi, {user.displayName || 'No Name'}
           </Typography>
-          <div style={profileInfoStyle}>
-            <img 
-              src={user.photoURL || 'https://via.placeholder.com/150'} 
-              alt="Profile"
-              style={profileImageStyle} 
-            />
-          </div>
+          <Avatar
+            src={user.photoURL || 'https://via.placeholder.com/150'}
+            alt="Profile"
+            sx={{ width: 150, height: 150, mb: 2 }}
+          />
+
           <Grid container spacing={2} justifyContent="center" style={{ marginBottom: '20px' }}>
             <Grid item xs={12} sm={6}>
-              <Card style={{ backgroundColor: '#333' }}>
+              <Card style={cardStyle}>
                 <CardContent>
-                  <Typography variant="h5" gutterBottom style={{ color: 'white' }}>
+                  <Typography variant="h5" gutterBottom>
                     Favorites
                   </Typography>
                   <Button 
@@ -54,9 +53,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
               </Card>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Card style={{ backgroundColor: '#333' }}>
+              <Card style={cardStyle}>
                 <CardContent>
-                  <Typography variant="h5" gutterBottom style={{ color: 'white' }}>
+                  <Typography variant="h5" gutterBottom>
                     Watchlist
                   </Typography>
                   <Button 
@@ -71,7 +70,14 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
               </Card>
             </Grid>
           </Grid>
-          <Button onClick={handleLogout} style={buttonStyle}>
+
+          <Button
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            sx={{ maxWidth: '300px', mt: 3 }}
+            onClick={handleLogout}
+          >
             Logout
           </Button>
         </div>
@@ -84,61 +90,37 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
   );
 };
 
-// Define styles using React.CSSProperties for proper typing
+// Define styles using React.CSSProperties or MUI's sx for proper typing
 const containerStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
   height: '100vh',
-  backgroundColor: 'rgb(40, 44, 68)',
+  backgroundColor: '#1a1a2e',
   padding: '20px',
 };
 
 const profileContainerStyle: React.CSSProperties = {
   display: 'flex',
-  flexDirection: 'column', // Change this line
+  flexDirection: 'column',
   alignItems: 'center',
-  backgroundColor: 'rgb(20, 60, 50)',
-  borderRadius: '8px',
-  boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-  padding: '20px',
+  backgroundColor: '#16213e',
+  borderRadius: '12px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  padding: '30px',
   width: '100%',
   maxWidth: '500px',
+  textAlign: 'center',
 };
 
 const headerStyle: React.CSSProperties = {
   marginBottom: '20px',
-  color: 'white',
-};
-
-const profileInfoStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '20px',
-  marginBottom: '20px',
-};
-
-const profileImageStyle: React.CSSProperties = {
-  width: '150px',
-  height: '150px',
-  borderRadius: '75px',
-  border: '3px solid #ddd',
-  objectFit: 'cover',
-};
-
-const buttonStyle: React.CSSProperties = {
-  padding: '10px 20px',
-  backgroundColor: '#2a2940',
   color: '#fff',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  width: '100%',
-  maxWidth: '300px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '16px',
+};
+
+const cardStyle: React.CSSProperties = {
+  backgroundColor: '#0f3460',
+  color: '#fff',
 };
 
 export default ProfilePage;

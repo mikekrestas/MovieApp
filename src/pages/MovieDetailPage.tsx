@@ -1,9 +1,12 @@
+// 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
 import { addFavorite, removeFavorite, addWatchlist, removeWatchlist } from '../services/authService';
 import { User } from 'firebase/auth';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
+
+// Material-UI components
+import { Box, Button, Typography, Paper } from '@mui/material';
 
 interface MovieDetailPageProps {
   user: User | null;
@@ -15,16 +18,15 @@ interface MovieDetailPageProps {
 
 const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults }) => {
   const { id } = useParams<{ id: string }>();
-  const [movie, setMovie] = useState<Movie | null>(null); // Initialize as null
-  const [isInWatchlist, setIsInWatchlist] = useState(false); // New state for watchlist
+  const [movie, setMovie] = useState<Movie | null>(null);
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
         const response = await fetch(`http://www.omdbapi.com/?i=${id}&plot=full&apikey=88e8fc3`); // Include your API key
         const data = await response.json();
-        console.log('Fetched Movie Details:', data);
-        
+
         if (data.Response === "True") {
           setMovie({
             movie_id: data.imdbID,
@@ -52,26 +54,11 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     fetchMovieDetails();
   }, [id]);
 
-  // Combine movies and searchResults
   const combinedMovies = [...movies, ...(searchResults || [])];
-
-  // Find the movie from combinedMovies
   const foundMovie = combinedMovies.find(m => m.movie_id === id);
-
-  // Debugging: Log the movie ID from the URL
-  console.log('Movie ID from URL:', id);
-
-  // Use foundMovie if movie is not fetched yet
   const displayMovie = movie || foundMovie;
 
-  // Debugging: Log the IDs of combined movies
-  console.log('Logging all combined movie IDs:');
-  combinedMovies.forEach(movie => {
-    console.log(`Movie ID: ${movie.movie_id}, Title: ${movie.title}`);
-  });
-
   if (!displayMovie) {
-    console.error(`No movie found with ID: ${id}`);
     return (
       <div className="text-center text-white my-5">
         <h1>Movie not found</h1>
@@ -96,7 +83,6 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     }
   };
 
-  // Handle adding/removing from watchlist
   const handleWatchlist = async () => {
     if (!user) {
       alert("Please log in to manage your watchlist");
@@ -126,33 +112,41 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
               <div className="card-body">
                 <h1 className="card-title mb-4">{displayMovie.title || 'Title not available'}</h1>
                 <div className="mb-4">
-                  <p><strong>Release Date:</strong> {displayMovie.releaseDate || 'N/A'}</p>
-                  <p><strong>Genre:</strong> {displayMovie.genre || 'N/A'}</p>
-                  <p><strong>Director:</strong> {displayMovie.director || 'N/A'}</p>
-                  <p><strong>Actors:</strong> {displayMovie.actors || 'N/A'}</p>
-                  <p><strong>Runtime:</strong> {displayMovie.runtime || 'N/A'}</p>
-                  <p><strong>IMDb Rating:</strong> {displayMovie.imdbRating || 'N/A'}</p>
-                  <p><strong>Box Office:</strong> {displayMovie.boxOffice || 'N/A'}</p>
-                  <p><strong>Production:</strong> {displayMovie.production || 'N/A'}</p>
+                  <Typography variant="body1"><strong>Release Date:</strong> {displayMovie.releaseDate || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Genre:</strong> {displayMovie.genre || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Director:</strong> {displayMovie.director || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Actors:</strong> {displayMovie.actors || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Runtime:</strong> {displayMovie.runtime || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>IMDb Rating:</strong> {displayMovie.imdbRating || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Box Office:</strong> {displayMovie.boxOffice || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Production:</strong> {displayMovie.production || 'N/A'}</Typography>
                 </div>
+
                 <h2 className="mb-3">Plot</h2>
-                <p className="card-text">{displayMovie.description || 'No plot available'}</p>
+                <Typography variant="body2" className="mb-4">
+                  {displayMovie.description || 'No plot available'}
+                </Typography>
 
-                {/* Favorite Button */}
-                <button
-                  onClick={handleFavorite}
-                  className={`btn ${isFavorite ? 'btn-danger' : 'btn-primary'} btn-lg`}
-                >
-                  {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
-                </button>
+                {/* Buttons Container */}
+                <Paper elevation={3} sx={{ padding: 2, marginTop: 2, textAlign: 'center' }}>
+                  <Box display="flex" justifyContent="space-around" sx={{ gap: 2 }}>
+                    <Button
+                      onClick={handleFavorite}
+                      variant={isFavorite ? 'contained' : 'outlined'}
+                      color={isFavorite ? 'error' : 'primary'}
+                    >
+                      {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
+                    </Button>
 
-                {/* Watchlist Button */}
-                <button
-                  onClick={handleWatchlist}
-                  className={`btn ${isInWatchlist ? 'btn-warning' : 'btn-secondary'} btn-lg ml-3`}
-                >
-                  {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
-                </button>
+                    <Button
+                      onClick={handleWatchlist}
+                      variant={isInWatchlist ? 'contained' : 'outlined'}
+                      color={isInWatchlist ? 'warning' : 'secondary'}
+                    >
+                      {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                    </Button>
+                  </Box>
+                </Paper>
               </div>
             </div>
           </div>

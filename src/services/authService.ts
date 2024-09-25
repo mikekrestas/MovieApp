@@ -110,9 +110,21 @@ export const login = (email: string, password: string): Promise<UserCredential> 
   return signInWithEmailAndPassword(auth, email, password);
 };
 
-export const loginWithGoogle = (): Promise<UserCredential> => {
+export const loginWithGoogle = async (): Promise<User | null> => {
   const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+  try {
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
+    
+    // Log the user object and photoURL
+    console.log('Logged in User:', user);
+    console.log('Google User Photo URL:', user.photoURL);
+    
+    return user;
+  } catch (error) {
+    console.error('Error during Google login:', error);
+    return null;
+  }
 };
 
 export const logout = (): Promise<void> => {
