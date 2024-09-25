@@ -1,9 +1,10 @@
-// src/pages/ProfilePage.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
 import { logout } from '../services/authService';
 import { Container, Typography, Button, Card, CardContent, Grid, Avatar } from '@mui/material';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase'; // Adjust the import as necessary
 
 interface ProfilePageProps {
   user: User | null;
@@ -11,6 +12,22 @@ interface ProfilePageProps {
 
 const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
   const navigate = useNavigate();
+  const [username, setUsername] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        const userRef = doc(db, 'users', user.uid); // Adjust path as necessary
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUsername(userData?.username || null); // Assuming `username` field is available
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -26,7 +43,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
       {user ? (
         <div style={profileContainerStyle}>
           <Typography variant="h4" style={headerStyle}>
-            Hi, {user.displayName || 'No Name'}
+            Hi, {username || user.displayName || 'No Name'}
           </Typography>
           <Avatar
             src={user.photoURL || 'https://via.placeholder.com/150'}

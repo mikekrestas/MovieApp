@@ -1,7 +1,7 @@
 // src/services/authService.ts
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup, User, updateProfile as firebaseUpdateProfile } from 'firebase/auth';
-import { doc, setDoc, collection, getDocs, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, getDoc, deleteDoc } from 'firebase/firestore';
 import { Movie } from '../types/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -102,12 +102,59 @@ export const getWatchlist = async (userId: string): Promise<Movie[]> => {
   }
 };
 
-export const signUp = (email: string, password: string): Promise<UserCredential> => {
-  return createUserWithEmailAndPassword(auth, email, password);
+// Add this utility function to check for existing users
+const checkUserExists = async (username: string, email: string) => {
+  const userDoc = doc(db, 'users', username);
+  const emailDoc = await getDoc(doc(db, 'emails', email)); // Assuming you have a separate collection for emails
+
+  const userExists = (await getDoc(userDoc)).exists();
+  const emailExists = emailDoc.exists();
+
+  return { userExists, emailExists };
 };
 
-export const login = (email: string, password: string): Promise<UserCredential> => {
-  return signInWithEmailAndPassword(auth, email, password);
+export const signUp = async (username: string, email: string, password: string): Promise<UserCredential> => {
+  const { userExists, emailExists } = await checkUserExists(username, email);
+
+  if (userExists) {
+    throw new Error('Username already taken. Please choose another one.');
+  }
+
+  if (emailExists) {
+    throw new Error('Email is already in use. Please choose another one.');
+  }
+
+  // Create user with email and password
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const user = userCredential.user;
+
+  // Save username in Firestore under the user's document
+  await setDoc(doc(db, 'users', user.uid), {
+    username,
+    email,
+    // You can add other user fields here
+  });
+
+  // Optionally, save the email separately if needed
+  await setDoc(doc(db, 'emails', email), { uid: user.uid });
+
+  return userCredential;
+};
+
+export const login = async (identifier: string, password: string): Promise<UserCredential> => {
+  // Use email if identifier looks like an email
+  if (identifier.includes('@')) {
+    return signInWithEmailAndPassword(auth, identifier, password);
+  } else {
+    // Handle login using username (implement the logic to retrieve user by username)
+    const userDoc = await getDoc(doc(db, 'users', identifier));
+    if (userDoc.exists()) {
+      const userEmail = userDoc.data().email; // assuming you stored the email with username
+      return signInWithEmailAndPassword(auth, userEmail, password);
+    } else {
+      throw new Error('User not found');
+    }
+  }
 };
 
 export const loginWithGoogle = async (): Promise<User | null> => {

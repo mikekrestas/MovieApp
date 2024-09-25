@@ -14,7 +14,10 @@ const AuthPage: React.FC = () => {
     e.preventDefault();
     try {
       if (isSignUp) {
-        await signUp(email, password);
+        const usernameInput = (e.target as HTMLFormElement).elements.namedItem('username') as HTMLInputElement;
+        const username = usernameInput.value;
+  
+        await signUp(username, email, password);
       } else {
         await login(email, password);
       }
@@ -33,6 +36,7 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  // Define styles here
   const containerStyle: CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -93,6 +97,7 @@ const AuthPage: React.FC = () => {
             <input
               type="text"
               placeholder="Username"
+              name="username" // Ensure this name matches the target reference
               style={inputStyle}
               required
             />

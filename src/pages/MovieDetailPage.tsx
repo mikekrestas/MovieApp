@@ -1,11 +1,9 @@
-// 
+// src/pages/MovieDetailPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
-import { addFavorite, removeFavorite, addWatchlist, removeWatchlist } from '../services/authService';
+import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, getWatchlist } from '../services/authService';
 import { User } from 'firebase/auth';
-
-// Material-UI components
 import { Box, Button, Typography, Paper } from '@mui/material';
 
 interface MovieDetailPageProps {
@@ -24,7 +22,7 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
-        const response = await fetch(`http://www.omdbapi.com/?i=${id}&plot=full&apikey=88e8fc3`); // Include your API key
+        const response = await fetch(`http://www.omdbapi.com/?i=${id}&plot=full&apikey=88e8fc3`);
         const data = await response.json();
 
         if (data.Response === "True") {
@@ -51,8 +49,17 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
       }
     };
 
+    const checkWatchlistStatus = async () => {
+      if (user) {
+        const watchlist = await getWatchlist(user.uid);
+        const isMovieInWatchlist = watchlist.some(movie => movie.movie_id === id);
+        setIsInWatchlist(isMovieInWatchlist);
+      }
+    };
+
     fetchMovieDetails();
-  }, [id]);
+    checkWatchlistStatus(); // Check watchlist status when component mounts
+  }, [id, user]);
 
   const combinedMovies = [...movies, ...(searchResults || [])];
   const foundMovie = combinedMovies.find(m => m.movie_id === id);
@@ -91,10 +98,11 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
 
     if (isInWatchlist) {
       await removeWatchlist(user.uid, displayMovie.movie_id);
+      setIsInWatchlist(false); // Update state after removal
     } else {
       await addWatchlist(user.uid, displayMovie);
+      setIsInWatchlist(true); // Update state after addition
     }
-    setIsInWatchlist(!isInWatchlist); // Toggle watchlist state
   };
 
   return (
