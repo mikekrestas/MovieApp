@@ -68,7 +68,10 @@ const App: React.FC = () => {
     <>
       <Header onSearch={handleSearch} user={user} />
       <Routes>
-        <Route path="/" element={<HomePage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} />} />
+        <Route path="/" element={<HomePage movies={movies} 
+  user={user} 
+  favorites={favorites} 
+  setFavorites={setFavorites} />} />
         <Route path="/favorites" element={<FavoritesPage user={user} favorites={favorites} setFavorites={setFavorites} />} />
         <Route path="/movie/:id" element={<MovieDetailPage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} />} />
         <Route path="/search" element={<SearchResultsPage searchResults={searchResults} />} />
