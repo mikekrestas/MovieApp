@@ -7,8 +7,12 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 
 const validateMovie = (movie: Partial<Movie>): Movie => {
+  if (!movie.movie_id || movie.movie_id.trim() === '') {
+    throw new Error('Invalid IMDb ID.');
+  }
+  
   return {
-    movie_id: movie.movie_id || '',
+    movie_id: movie.movie_id,
     title: movie.title || 'No Title',
     description: movie.description || 'No Description',
     releaseDate: movie.releaseDate || 'Unknown',

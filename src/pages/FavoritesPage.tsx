@@ -12,6 +12,17 @@ interface FavoritesPageProps {
 }
 
 const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavorites }) => {
+  const movieCardStyle: React.CSSProperties = {
+    width: '200px',
+    height: '300px',
+    borderRadius: '10px',
+    transition: 'transform 0.3s ease, border-color 0.3s ease',
+    display: 'block',
+    margin: '0 auto',
+    position: 'relative',
+    top: '0',
+  };
+
   return (
     <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
       <h3 className="my-2"> </h3>
@@ -22,8 +33,8 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavor
         ) : (
           <div className="row">
             {favorites.map((movie) => (
-              <div key={movie.movie_id} className="col-sm-6 col-md-4 col-lg-3 mb-4">
-                <MovieCard movie={movie} />
+              <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
+                <MovieCard movie={movie} style={movieCardStyle} />
               </div>
             ))}
           </div>

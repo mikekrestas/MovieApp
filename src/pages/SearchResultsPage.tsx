@@ -1,3 +1,4 @@
+// src/pages/SearchResultsPage.tsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Movie } from '../types/types';
@@ -9,9 +10,7 @@ interface SearchResultsPageProps {
 const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ searchResults = [] }) => {
   return (
     <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h1 className="my-5 text-center text-uppercase font-weight-bold" style={{ fontSize: '3rem', color: '#ffcc00' }}>
-        Search Results
-      </h1>
+      <h1 className="my-5 text-center text-uppercase font-weight-bold" style={{ fontSize: '3rem', color: '#ffcc00' }}></h1>
       <div className="container">
         <div className="row">
           {searchResults.map((movie) => (
@@ -19,9 +18,9 @@ const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ searchResults = [
               <div className="card bg-secondary text-white h-100" style={{ border: 'none' }}>
                 <Link to={`/movie/${movie.movie_id}`} className="text-white text-decoration-none">
                   <img 
-                    src={movie.posterPath} 
+                    src={movie.posterPath || 'https://via.placeholder.com/400x600'} 
                     alt={movie.title} 
-                    className="card-img-top" 
+                    className="card-img-top movie-poster"
                     style={{ 
                       width: '100%', 
                       height: 'auto', 

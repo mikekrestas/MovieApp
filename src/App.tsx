@@ -73,7 +73,7 @@ const App: React.FC = () => {
   favorites={favorites} 
   setFavorites={setFavorites} />} />
         <Route path="/favorites" element={<FavoritesPage user={user} favorites={favorites} setFavorites={setFavorites} />} />
-        <Route path="/movie/:id" element={<MovieDetailPage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} />} />
+        <Route path="/movie/:id" element={<MovieDetailPage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} searchResults={searchResults}/>} />
         <Route path="/search" element={<SearchResultsPage searchResults={searchResults} />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
