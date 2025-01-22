@@ -1,28 +1,24 @@
-// src/pages/WatchlistPage.tsx
 import React, { useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
-import { getWatchlist, getFilms } from '../services/authService';
+import { getFilms } from '../services/authService';
 import MovieCard from '../components/MovieCard';
 import { Movie } from '../types/types';
 
-interface WatchlistPageProps {
+interface FilmsPageProps {
   user: User | null;
 }
 
-const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
-  const [watchlist, setWatchlist] = useState<Movie[]>([]);
+const FilmsPage: React.FC<FilmsPageProps> = ({ user }) => {
   const [films, setFilms] = useState<Movie[]>([]);
 
   useEffect(() => {
-    const fetchWatchlist = async () => {
+    const fetchFilms = async () => {
       if (user) {
-        const movies = await getWatchlist(user.uid);
-        setWatchlist(movies);
-        const films = await getFilms(user.uid);
-        setFilms(films);
+        const movies = await getFilms(user.uid);
+        setFilms(movies);
       }
     };
-    fetchWatchlist();
+    fetchFilms();
   }, [user]);
 
   const movieCardStyle: React.CSSProperties = {
@@ -38,16 +34,15 @@ const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
 
   return (
     <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h3 className="my-2"> </h3>
-      <h1 className="my-5">Watchlist</h1>
+      <h1 className="my-5">My Films</h1>
       <div className="container">
-        {watchlist.length === 0 ? (
-          <p className="text-center" style={{ fontSize: '1.5rem' }}>Your watchlist is empty.</p>
+        {films.length === 0 ? (
+          <p className="text-center" style={{ fontSize: '1.5rem' }}>Your films list is empty.</p>
         ) : (
           <div className="row">
-            {watchlist.map((movie) => (
+            {films.map((movie) => (
               <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                <MovieCard movie={movie} style={movieCardStyle} isInFilms={films.some(film => film.movie_id === movie.movie_id)} />
+                <MovieCard movie={movie} style={movieCardStyle} isInFilms={true} />
               </div>
             ))}
           </div>
@@ -57,4 +52,4 @@ const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
   );
 };
 
-export default WatchlistPage;
+export default FilmsPage;

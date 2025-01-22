@@ -47,18 +47,15 @@ export const removeFavorite = async (userId: string, movieId: string) => {
   await deleteDoc(movieRef);
 };
 
-// Update your getFavorites function
 export const getFavorites = async (userId: string): Promise<Movie[]> => {
   console.log('Fetching favorites for user:', userId);
   try {
-    // Reference to the user's favorites subcollection
     const favoritesRef = collection(db, 'users', userId, 'favorites');
     const favoritesSnapshot = await getDocs(favoritesRef);
     const favorites: Movie[] = [];
     
-    // Iterate over each document in the favorites snapshot
     favoritesSnapshot.forEach((doc) => {
-      favorites.push(doc.data() as Movie); // Cast to Movie type
+      favorites.push(doc.data() as Movie);
     });
 
     console.log('Favorites fetched successfully:', favorites);
@@ -102,6 +99,40 @@ export const getWatchlist = async (userId: string): Promise<Movie[]> => {
     return movies;
   } catch (error) {
     console.error('Error fetching watchlist:', error);
+    throw error;
+  }
+};
+
+export const addFilm = async (userId: string, movie: Partial<Movie>) => {
+  const validMovie = validateMovie(movie);
+  console.log('Adding film:', validMovie);
+  try {
+    const movieRef = doc(db, 'users', userId, 'films', validMovie.movie_id);
+    await setDoc(movieRef, validMovie);
+    console.log('Movie added to films successfully.');
+  } catch (error) {
+    console.error('Error adding movie to films:', error);
+  }
+};
+
+export const removeFilm = async (userId: string, movieId: string) => {
+  const movieRef = doc(db, 'users', userId, 'films', movieId);
+  await deleteDoc(movieRef);
+};
+
+export const getFilms = async (userId: string): Promise<Movie[]> => {
+  console.log('Fetching films for user:', userId);
+  try {
+    const filmsRef = collection(db, 'users', userId, 'films');
+    const filmsSnapshot = await getDocs(filmsRef);
+    const films: Movie[] = [];
+    filmsSnapshot.forEach((doc) => {
+      films.push(doc.data() as Movie);
+    });
+    console.log('Films fetched successfully:', films);
+    return films;
+  } catch (error) {
+    console.error('Error fetching films:', error);
     throw error;
   }
 };

@@ -39,71 +39,90 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
   };
 
   return (
-    <Container style={containerStyle}>
-      {user ? (
-        <div style={profileContainerStyle}>
-          <Typography variant="h4" style={headerStyle}>
-            Hi, {username || user.displayName || 'No Name'}
+    <div className="d-flex flex-column min-vh-100 bg-dark text-white">
+      <Container style={containerStyle}>
+        {user ? (
+          <div style={profileContainerStyle}>
+            <Typography variant="h4" style={headerStyle}>
+              Hi, {username || user.displayName || 'No Name'}
+            </Typography>
+            <Avatar
+              src={user.photoURL || 'https://via.placeholder.com/150'}
+              alt="Profile"
+              sx={{ width: 150, height: 150, mb: 2 }}
+            />
+
+            <Grid container spacing={2} justifyContent="center" style={{ marginBottom: '20px' }}>
+              <Grid item xs={12} sm={6}>
+                <Card style={cardStyle}>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Favorites
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      onClick={() => navigate('/favorites')}
+                    >
+                      Go to Favorites
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Card style={cardStyle}>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Watchlist
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      onClick={() => navigate('/watchlist')}
+                    >
+                      Go to Watchlist
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+                <Card style={cardStyle}>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Films
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      onClick={() => navigate('/films')}
+                    >
+                      Go to Films
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+            <Button
+              variant="outlined"
+              color="secondary"
+              fullWidth
+              sx={{ maxWidth: '300px', mt: 3 }}
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <Typography variant="h6" style={{ color: 'white' }}>
+            No user logged in.
           </Typography>
-          <Avatar
-            src={user.photoURL || 'https://via.placeholder.com/150'}
-            alt="Profile"
-            sx={{ width: 150, height: 150, mb: 2 }}
-          />
-
-          <Grid container spacing={2} justifyContent="center" style={{ marginBottom: '20px' }}>
-            <Grid item xs={12} sm={6}>
-              <Card style={cardStyle}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Favorites
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    fullWidth 
-                    onClick={() => navigate('/favorites')}
-                  >
-                    Go to Favorites
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card style={cardStyle}>
-                <CardContent>
-                  <Typography variant="h5" gutterBottom>
-                    Watchlist
-                  </Typography>
-                  <Button 
-                    variant="contained" 
-                    color="primary" 
-                    fullWidth 
-                    onClick={() => navigate('/watchlist')}
-                  >
-                    Go to Watchlist
-                  </Button>
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
-
-          <Button
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            sx={{ maxWidth: '300px', mt: 3 }}
-            onClick={handleLogout}
-          >
-            Logout
-          </Button>
-        </div>
-      ) : (
-        <Typography variant="h6" style={{ color: 'white' }}>
-          No user logged in.
-        </Typography>
-      )}
-    </Container>
+        )}
+      </Container>
+    </div>
   );
 };
 
@@ -113,7 +132,7 @@ const containerStyle: React.CSSProperties = {
   justifyContent: 'center',
   alignItems: 'center',
   height: '100vh',
-  backgroundColor: '#1a1a2e',
+  backgroundColor: 'transparent', // Set to transparent to match the normal background color of the page
   padding: '20px',
 };
 

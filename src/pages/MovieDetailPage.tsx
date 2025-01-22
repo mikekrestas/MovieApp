@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
-import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, getWatchlist } from '../services/authService';
+import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, addFilm, removeFilm, getWatchlist, getFilms } from '../services/authService';
 import { User } from 'firebase/auth';
 import { Box, Button, Typography, Paper } from '@mui/material';
 
@@ -18,6 +18,7 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [isInFilms, setIsInFilms] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -57,8 +58,17 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
       }
     };
 
+    const checkFilmsStatus = async () => {
+      if (user) {
+        const films = await getFilms(user.uid);
+        const isMovieInFilms = films.some(movie => movie.movie_id === id);
+        setIsInFilms(isMovieInFilms);
+      }
+    };
+
     fetchMovieDetails();
-    checkWatchlistStatus(); // Check watchlist status when component mounts
+    checkWatchlistStatus();
+    checkFilmsStatus();
   }, [id, user]);
 
   const combinedMovies = [...movies, ...(searchResults || [])];
@@ -105,9 +115,24 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     }
   };
 
+  const handleFilms = async () => {
+    if (!user) {
+      alert("Please log in to manage your films");
+      return;
+    }
+
+    if (isInFilms) {
+      await removeFilm(user.uid, displayMovie.movie_id);
+      setIsInFilms(false); // Update state after removal
+    } else {
+      await addFilm(user.uid, displayMovie);
+      setIsInFilms(true); // Update state after addition
+    }
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100 bg-dark text-white">
-      <div className="container my-5 flex-grow-1 d-flex flex-column justify-content-center">
+      <div className="container my-5 flex-grow-1 d-flex flex-column justify-content-center" style={{ paddingTop: '40px' }}>
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
             <div className="card bg-dark text-white border-0">
@@ -141,7 +166,7 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
                     <Button
                       onClick={handleFavorite}
                       variant={isFavorite ? 'contained' : 'outlined'}
-                      color={isFavorite ? 'error' : 'primary'}
+                      color={isFavorite ? 'warning' : 'primary'}
                     >
                       {isFavorite ? 'Remove from Favorites' : 'Add to Favorites'}
                     </Button>
@@ -152,6 +177,14 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
                       color={isInWatchlist ? 'warning' : 'secondary'}
                     >
                       {isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+                    </Button>
+
+                    <Button
+                      onClick={handleFilms}
+                      variant={isInFilms ? 'contained' : 'outlined'}
+                      color={isInFilms ? 'success' : 'primary'}
+                    >
+                      {isInFilms ? 'Remove from Films' : 'Add to Films'}
                     </Button>
                   </Box>
                 </Paper>

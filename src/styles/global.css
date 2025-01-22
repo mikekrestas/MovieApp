@@ -1,9 +1,12 @@
 .movie-poster {
-    transition: transform 0.3s ease, border-color 0.3s ease;
-  }
-  
-  .movie-poster:hover {
-    border: 2px solid #40bcf4;
-    transform: scale(1.01);
-  }
-  
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.movie-poster:hover {
+  border: 2px solid #40bcf4; /* Default hover border color */
+  transform: scale(1.01);
+}
+
+.movie-poster.in-films:hover {
+  border: 2px solid #34A853; /* Green hover border color for movies in films */
+}

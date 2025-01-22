@@ -9,9 +9,10 @@ interface FavoritesPageProps {
   user: User | null;
   favorites: Movie[];
   setFavorites: (movies: Movie[]) => void;
+  films: Movie[];
 }
 
-const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavorites }) => {
+const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavorites, films }) => {
   const movieCardStyle: React.CSSProperties = {
     width: '200px',
     height: '300px',
@@ -34,7 +35,7 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavor
           <div className="row">
             {favorites.map((movie) => (
               <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                <MovieCard movie={movie} style={movieCardStyle} />
+                <MovieCard movie={movie} style={movieCardStyle} isInFilms={films.some(film => film.movie_id === movie.movie_id)} />
               </div>
             ))}
           </div>

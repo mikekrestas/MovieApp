@@ -2,14 +2,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Movie } from '../types/types';
-import 'bootstrap/dist/css/bootstrap.min.css'; // Ensure Bootstrap CSS is imported
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../styles/global.css'; // Ensure global styles are imported
 
 interface MovieCardProps {
   movie: Movie;
+  isInFilms: boolean;
   style?: React.CSSProperties;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, style }) => {
+const MovieCard: React.FC<MovieCardProps> = ({ movie, isInFilms, style }) => {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
@@ -17,12 +19,19 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, style }) => {
   };
 
   return (
-    <div className="card mb-4" style={{ cursor: 'pointer', ...style }} onClick={handleCardClick}>
+    <div
+      className={`card mb-4 ${isInFilms ? 'in-films' : ''}`}
+      style={{
+        cursor: 'pointer',
+        ...style,
+      }}
+      onClick={handleCardClick}
+    >
       <img
         src={movie.posterPath || 'https://via.placeholder.com/200x300'}
         alt={movie.title}
-        className="card-img-top movie-poster"  // Apply the movie-poster class here
-        style={{ height: '300px', objectFit: 'cover' }}  // Keep your existing style
+        className={`card-img-top movie-poster ${isInFilms ? 'in-films' : ''}`}
+        style={{ height: '300px', objectFit: 'cover' }}
       />
     </div>
   );
