@@ -63,7 +63,7 @@ const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, movi
               >
                 <Link to={`/movie/${movie.movie_id}`} className="block">
                   <img
-                    src={movie.posterPath}
+                    src={movie.posterPath || 'https://via.placeholder.com/200x300'}
                     alt={movie.title}
                     className={`rounded-lg object-cover mx-auto movie-poster ${films.some(film => film.movie_id === movie.movie_id) ? 'in-films' : ''}`}
                     style={{
