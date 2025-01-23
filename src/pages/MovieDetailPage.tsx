@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
 import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, addFilm, removeFilm, getWatchlist, getFilms } from '../services/authService';
+import { fetchMovieDetails } from '../services/movieService';
 import { User } from 'firebase/auth';
 import { Box, Button, Typography, Paper } from '@mui/material';
 
@@ -12,6 +13,7 @@ interface MovieDetailPageProps {
   setFavorites: (movies: Movie[]) => void;
   movies: Movie[];
   searchResults?: Movie[];
+  films: Movie[];
 }
 
 const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults }) => {
@@ -21,30 +23,10 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
   const [isInFilms, setIsInFilms] = useState(false);
 
   useEffect(() => {
-    const fetchMovieDetails = async () => {
+    const fetchMovieDetailsAsync = async () => {
       try {
-        const response = await fetch(`http://www.omdbapi.com/?i=${id}&plot=full&apikey=88e8fc3`);
-        const data = await response.json();
-
-        if (data.Response === "True") {
-          setMovie({
-            movie_id: data.imdbID,
-            title: data.Title,
-            description: data.Plot || 'No Description',
-            releaseDate: data.Released || 'Unknown Release Date',
-            posterPath: data.Poster || '',
-            director: data.Director || 'No Director',
-            actors: data.Actors || 'No Actors',
-            genre: data.Genre || 'No Genre',
-            imdbRating: data.imdbRating || 'No IMDb Rating',
-            language: data.Language || 'No Language',
-            runtime: data.Runtime || 'No Runtime',
-            boxOffice: data.BoxOffice !== "N/A" ? data.BoxOffice : 'Unknown Box Office',
-            production: data.Production !== "N/A" ? data.Production : 'Unknown Production',
-          });
-        } else {
-          console.error(`Movie not found: ${data.Error}`);
-        }
+        const movieDetails = await fetchMovieDetails(id!);
+        setMovie(movieDetails);
       } catch (error) {
         console.error('Error fetching movie details:', error);
       }
@@ -66,7 +48,7 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
       }
     };
 
-    fetchMovieDetails();
+    fetchMovieDetailsAsync();
     checkWatchlistStatus();
     checkFilmsStatus();
   }, [id, user]);

@@ -12,8 +12,7 @@ import WatchlistPage from './pages/WatchlistPage';
 import FilmsPage from './pages/FilmsPage'; // Import FilmsPage
 import { auth } from './firebase';
 import { getFavorites, getFilms } from './services/authService';
-import { searchMovies } from './services/movieService'; // Keep for search functionality
-import { fetchLatestMovies } from './services/movieService'; // Use this for latest movies from TMDB
+import { searchMovies, fetchLatestMovies } from './services/movieService'; // Import fetchLatestMovies
 import { Movie } from './types/types';
 import { User } from 'firebase/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -73,20 +72,15 @@ const App: React.FC = () => {
     <>
       <Header onSearch={handleSearch} user={user} />
       <Routes>
-        <Route path="/" element={<HomePage movies={movies} 
-  user={user} 
-  favorites={favorites} 
-  setFavorites={setFavorites} 
-  films={films} />} />
         <Route path="/" element={<HomePage movies={movies} user={user} favorites={favorites} setFavorites={setFavorites} films={films} />} />
         <Route path="/favorites" element={<FavoritesPage user={user} favorites={favorites} setFavorites={setFavorites} films={films} />} />
-        <Route path="/movie/:id" element={<MovieDetailPage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} searchResults={searchResults}/>} />
-        <Route path="/search" element={<SearchResultsPage user={user} searchResults={searchResults} films={films}/>} />
+        <Route path="/movie/:id" element={<MovieDetailPage user={user} favorites={favorites} setFavorites={setFavorites} movies={movies} searchResults={searchResults} films={films} />} />
+        <Route path="/search" element={<SearchResultsPage user={user} searchResults={searchResults} films={films} />} /> {/* Pass user prop */}
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/watchlist" element={<WatchlistPage user={user} />} />
         <Route path="/profile" element={<ProfilePage user={user} />} />
-        <Route path="/films" element={<FilmsPage user={user} />} />
+        <Route path="/watchlist" element={<WatchlistPage user={user} />} />
+        <Route path="/films" element={<FilmsPage user={user} />} /> {/* Add route for FilmsPage */}
       </Routes>
     </>
   );
