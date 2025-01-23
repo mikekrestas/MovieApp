@@ -46,6 +46,8 @@ const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, movi
     ],
   };
 
+  console.log('Movies:', movies); // Add this line to log the movies data
+
   return (
     <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
       <h1 className="my-4 pt-5">Latest Movies</h1>

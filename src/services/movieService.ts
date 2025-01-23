@@ -27,22 +27,77 @@ const genreMap: { [key: number]: string } = {
   37: 'Western',
 };
 
-// Transform the TMDB API movie response into your Movie type
-const transformApiMovie = (tmdbMovie: any): Movie => ({
-  movie_id: tmdbMovie.id.toString(),
-  title: tmdbMovie.title || 'No Title',
-  description: tmdbMovie.overview || 'No Description',
-  releaseDate: tmdbMovie.release_date || 'Unknown Release Date',
-  posterPath: `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` || 'No Poster',
-  genre: tmdbMovie.genres.map((genre: any) => genre.name).join(', ') || 'No Genre',
-  director: tmdbMovie.credits.crew.find((member: any) => member.job === 'Director')?.name || 'No Director',
-  actors: tmdbMovie.credits.cast.slice(0, 5).map((actor: any) => actor.name).join(', ') || 'No Actors',
-  imdbRating: tmdbMovie.vote_average ? tmdbMovie.vote_average.toFixed(1) : 'No IMDb Rating',
-  language: tmdbMovie.original_language || 'No Language',
-  production: tmdbMovie.production_companies.map((company: any) => company.name).join(', ') || 'No Production',
-  runtime: tmdbMovie.runtime ? `${tmdbMovie.runtime} min` : 'No Runtime',
-  boxOffice: tmdbMovie.revenue ? `$${tmdbMovie.revenue.toLocaleString()}` : 'No Box Office Data',
-});
+const languageMap: { [key: string]: string } = {
+  en: 'English',
+  fr: 'French',
+  es: 'Spanish',
+  de: 'German',
+  it: 'Italian',
+  ja: 'Japanese',
+  ko: 'Korean',
+  zh: 'Chinese',
+  // Add more language codes and names as needed
+};
+
+// Transform the TMDB API movie response into your Movie type for now_playing endpoint
+const transformNowPlayingMovie = (tmdbMovie: any): Movie => {
+  console.log('TMDB Movie:', tmdbMovie); // Add this line to log the movie data
+  return {
+    movie_id: tmdbMovie.id.toString(),
+    title: tmdbMovie.title || 'No Title',
+    description: tmdbMovie.overview || 'No Description',
+    releaseDate: tmdbMovie.release_date || 'Unknown Release Date',
+    posterPath: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : 'https://via.placeholder.com/200x300',
+    genre: tmdbMovie.genre_ids.map((id: number) => genreMap[id]).join(', ') || 'No Genre',
+    director: '', // TMDB doesn't provide director info in this endpoint
+    actors: '', // No actor info available in this endpoint
+    imdbRating: tmdbMovie.vote_average ? tmdbMovie.vote_average.toFixed(1) : 'No IMDb Rating',
+    language: languageMap[tmdbMovie.original_language] || 'Unknown Language',
+    production: '', // Not available in the now playing endpoint
+    runtime: '', // No runtime, this can be fetched in detail API if needed
+  };
+};
+
+// Transform the TMDB API movie response into your Movie type for detailed movie endpoint
+const transformDetailedMovie = (tmdbMovie: any): Movie => {
+  console.log('TMDB Movie:', tmdbMovie); // Add this line to log the movie data
+  return {
+    movie_id: tmdbMovie.id.toString(),
+    title: tmdbMovie.title || 'No Title',
+    description: tmdbMovie.overview || 'No Description',
+    releaseDate: tmdbMovie.release_date || 'Unknown Release Date',
+    posterPath: tmdbMovie.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbMovie.poster_path}` : 'https://via.placeholder.com/200x300',
+    genre: tmdbMovie.genres.map((genre: any) => genre.name).join(', ') || 'No Genre',
+    director: tmdbMovie.credits.crew.find((member: any) => member.job === 'Director')?.name || 'No Director',
+    actors: tmdbMovie.credits.cast.slice(0, 5).map((actor: any) => actor.name).join(', ') || 'No Actors',
+    imdbRating: tmdbMovie.vote_average ? tmdbMovie.vote_average.toFixed(1) : 'No IMDb Rating',
+    language: languageMap[tmdbMovie.original_language] || 'Unknown Language',
+    production: tmdbMovie.production_companies.map((company: any) => company.name).join(', ') || 'No Production',
+    runtime: tmdbMovie.runtime ? `${tmdbMovie.runtime} min` : 'No Runtime',
+    boxOffice: tmdbMovie.revenue ? `$${tmdbMovie.revenue.toLocaleString()}` : 'No Box Office Data',
+  };
+};
+
+export const fetchLatestMovies = async (): Promise<Movie[]> => {
+  try {
+    const response = await axios.get(`${TMDB_BASE_URL}/movie/now_playing`, {
+      params: {
+        api_key: TMDB_API_KEY,
+        language: 'en-US',
+        page: 1,
+      },
+    });
+
+    console.log('TMDB Response:', response.data.results); // Add this line to log the response data
+
+    const movies = response.data.results.map(transformNowPlayingMovie);
+    console.log('Transformed Movies:', movies); // Add this line to log the transformed movies
+    return movies;
+  } catch (error) {
+    console.error('Error fetching latest movies from TMDB:', error);
+    throw error;
+  }
+};
 
 // Fetch latest movies currently playing in cinemas
 export const fetchMovieDetails = async (movieId: string): Promise<Movie> => {
@@ -55,29 +110,10 @@ export const fetchMovieDetails = async (movieId: string): Promise<Movie> => {
       },
     });
 
-    const movie = transformApiMovie(response.data);
+    const movie = transformDetailedMovie(response.data);
     return movie;
   } catch (error) {
     console.error('Error fetching movie details from TMDB:', error);
-    throw error;
-  }
-};
-
-// Fetch latest movies currently playing in cinemas
-export const fetchLatestMovies = async (): Promise<Movie[]> => {
-  try {
-    const response = await axios.get(`${TMDB_BASE_URL}/movie/now_playing`, {
-      params: {
-        api_key: TMDB_API_KEY,
-        language: 'en-US',
-        page: 1,
-      },
-    });
-
-    const movies = response.data.results.map(transformApiMovie);
-    return movies;
-  } catch (error) {
-    console.error('Error fetching latest movies from TMDB:', error);
     throw error;
   }
 };
@@ -93,7 +129,7 @@ export const searchMovies = async (query: string): Promise<Movie[]> => {
       },
     });
 
-    const movies = response.data.results.map(transformApiMovie);
+    const movies = response.data.results.map(transformNowPlayingMovie);
     return movies;
   } catch (error) {
     console.error('Error searching movies from TMDB:', error);

@@ -16,7 +16,7 @@ interface MovieDetailPageProps {
   films: Movie[];
 }
 
-const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults }) => {
+const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setFavorites, movies, searchResults, films }) => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
@@ -135,6 +135,7 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
                   <Typography variant="body1"><strong>IMDb Rating:</strong> {displayMovie.imdbRating || 'N/A'}</Typography>
                   <Typography variant="body1"><strong>Box Office:</strong> {displayMovie.boxOffice || 'N/A'}</Typography>
                   <Typography variant="body1"><strong>Production:</strong> {displayMovie.production || 'N/A'}</Typography>
+                  <Typography variant="body1"><strong>Language:</strong> {displayMovie.language || 'N/A'}</Typography> {/* Ensure language is displayed */}
                 </div>
 
                 <h2 className="mb-3">Plot</h2>
