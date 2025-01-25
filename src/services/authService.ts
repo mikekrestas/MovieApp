@@ -129,7 +129,7 @@ export const getFilms = async (userId: string): Promise<Movie[]> => {
     filmsSnapshot.forEach((doc) => {
       films.push(doc.data() as Movie);
     });
-    console.log('Films fetched successfully:', films);
+  
     return films;
   } catch (error) {
     console.error('Error fetching films:', error);

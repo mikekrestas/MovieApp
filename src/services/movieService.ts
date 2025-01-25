@@ -88,10 +88,7 @@ export const fetchLatestMovies = async (): Promise<Movie[]> => {
       },
     });
 
-    console.log('TMDB Response:', response.data.results); // Add this line to log the response data
-
     const movies = response.data.results.map(transformNowPlayingMovie);
-    console.log('Transformed Movies:', movies); // Add this line to log the transformed movies
     return movies;
   } catch (error) {
     console.error('Error fetching latest movies from TMDB:', error);

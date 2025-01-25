@@ -1,4 +1,3 @@
-// Example Movie type definition
 export interface Movie {
   movie_id: string;
   title: string;

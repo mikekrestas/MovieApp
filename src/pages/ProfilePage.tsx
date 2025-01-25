@@ -38,6 +38,14 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
     }
   };
 
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: '#333',
+    color: '#fff',
+    padding: '20px',
+    borderRadius: '10px',
+    textAlign: 'center',
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100 bg-dark text-white">
       <Container style={containerStyle}>
@@ -87,8 +95,7 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
                   </CardContent>
                 </Card>
               </Grid>
-            </Grid>
-            <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={6}>
                 <Card style={cardStyle}>
                   <CardContent>
                     <Typography variant="h5" gutterBottom>
@@ -105,6 +112,24 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
                   </CardContent>
                 </Card>
               </Grid>
+              <Grid item xs={12} sm={6}>
+                <Card style={cardStyle}>
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      Recommendations
+                    </Typography>
+                    <Button 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth 
+                      onClick={() => navigate('/recommendations')}
+                    >
+                      Get Recommendations
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
 
             <Button
               variant="outlined"
@@ -151,11 +176,6 @@ const profileContainerStyle: React.CSSProperties = {
 
 const headerStyle: React.CSSProperties = {
   marginBottom: '20px',
-  color: '#fff',
-};
-
-const cardStyle: React.CSSProperties = {
-  backgroundColor: '#0f3460',
   color: '#fff',
 };
 
