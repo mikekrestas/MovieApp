@@ -1,5 +1,11 @@
 .movie-poster {
   transition: transform 0.3s ease, border-color 0.3s ease;
+  border-radius: 10px; /* Apply rounded corners to all sides */
+  border: none; /* Remove any default border */
+  padding: 0; /* Remove any default padding */
+  display: block; /* Ensure the image is displayed as a block element */
+  width: 100%; /* Ensure the image takes the full width of its container */
+  background-color: #1c1c1c; /* Set background color to match app's dark grey background */
 }
 
 .movie-poster:hover {
