@@ -11,7 +11,7 @@ import Login from './components/Login';
 import ProfilePage from './pages/ProfilePage';
 import WatchlistPage from './pages/WatchlistPage';
 import FilmsPage from './pages/FilmsPage';
-import RecommendationsPage from './pages/RecommendationsPage'; // Import RecommendationsPage
+import RecommendationsPage from './pages/RecommendationsPage';
 import { auth } from './firebase';
 import { getFavorites, getFilms } from './services/authService';
 import { searchMovies, fetchLatestMovies } from './services/movieService';
@@ -80,7 +80,7 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage user={user} />} />
         <Route path="/watchlist" element={<WatchlistPage user={user} />} />
         <Route path="/films" element={<FilmsPage user={user} />} />
-        <Route path="/recommendations" element={<RecommendationsPage user={user} />} /> {/* Add route for RecommendationsPage */}
+        <Route path="/recommendations" element={<RecommendationsPage user={user} />} />
       </Routes>
     </>
   );

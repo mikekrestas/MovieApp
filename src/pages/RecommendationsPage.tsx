@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
-import { getFavorites, getFilms } from '../services/authService';
+import { getFavorites, getFilms, getWatchlist } from '../services/authService';
 import { getRecommendations } from '../services/recommendationService';
 import MovieCard from '../components/MovieCard';
 import { Movie } from '../types/types';
@@ -16,12 +16,20 @@ const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ user }) => {
   useEffect(() => {
     const fetchRecommendations = async () => {
       if (user) {
-        const favoriteMovies = await getFavorites(user.uid);
+        const [favoriteMovies, userFilms, watchlistMovies] = await Promise.all([
+          getFavorites(user.uid),
+          getFilms(user.uid),
+          getWatchlist(user.uid)
+        ]);
         const favoriteMovieIds = favoriteMovies.map(movie => movie.movie_id);
-        const recommendedMovies = await getRecommendations(favoriteMovieIds);
+        const watchedMovieIds = userFilms.map(movie => movie.movie_id);
+        const watchlistMovieIds = watchlistMovies.map(movie => movie.movie_id);
+        const recommendedMovies = await getRecommendations({
+          favorite_movie_ids: favoriteMovieIds,
+          watched_movie_ids: watchedMovieIds,
+          watchlist_movie_ids: watchlistMovieIds
+        }, 18);
         setRecommendations(recommendedMovies);
-
-        const userFilms = await getFilms(user.uid);
         setFilms(userFilms);
       }
     };
@@ -44,21 +52,17 @@ const RecommendationsPage: React.FC<RecommendationsPageProps> = ({ user }) => {
   };
 
   return (
-    <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h1 className="my-5">Recommended Movies</h1>
-      <div className="container">
-        {recommendations.length === 0 ? (
-          <p className="text-center" style={{ fontSize: '1.5rem' }}>No recommendations available.</p>
-        ) : (
-          <div className="row">
-            {recommendations.map((movie) => (
-              <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                <MovieCard movie={movie} style={movieCardStyle} isInFilms={isInFilms(movie.movie_id)} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">
+      <h1 className="my-5 text-4xl font-bold text-white drop-shadow-lg">Recommended Movies</h1>
+      {recommendations.length === 0 ? (
+        <p className="text-center text-xl text-gray-300">No recommendations available.</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {recommendations.map((movie) => (
+            <MovieCard key={movie.movie_id} movie={movie} style={{}} isInFilms={isInFilms(movie.movie_id)} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

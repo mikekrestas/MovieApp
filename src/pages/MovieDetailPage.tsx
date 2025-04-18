@@ -2,10 +2,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Movie } from '../types/types';
-import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, addFilm, removeFilm, getWatchlist, getFilms } from '../services/authService';
+import { addFavorite, removeFavorite, addWatchlist, removeWatchlist, addFilm, removeFilm, getWatchlist, getFilms, setRating, getRating } from '../services/authService';
 import { fetchMovieDetails } from '../services/movieService';
 import { User } from 'firebase/auth';
 import { Box, Button, Typography, Paper } from '@mui/material';
+import Rating from 'react-rating';
+import { FaStar, FaRegStar } from 'react-icons/fa';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '../firebase';
 
 interface MovieDetailPageProps {
   user: User | null;
@@ -21,6 +25,10 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
   const [movie, setMovie] = useState<Movie | null>(null);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
   const [isInFilms, setIsInFilms] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [rating, setLocalRating] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [authUser] = useAuthState(auth);
 
   useEffect(() => {
     const fetchMovieDetailsAsync = async () => {
@@ -52,6 +60,12 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     checkWatchlistStatus();
     checkFilmsStatus();
   }, [id, user]);
+
+  useEffect(() => {
+    if (authUser && movie) {
+      getRating(authUser.uid, movie.movie_id).then(r => setLocalRating(r));
+    }
+  }, [authUser, movie]);
 
   const combinedMovies = [...movies, ...(searchResults || [])];
   const foundMovie = combinedMovies.find(m => m.movie_id === id);
@@ -112,6 +126,16 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
     }
   };
 
+  const handleRatingChange = async (newRating: number) => {
+    if (authUser && displayMovie) {
+      setLoading(true);
+      await setRating(authUser.uid, displayMovie.movie_id, newRating);
+      setLocalRating(newRating);
+      setLoading(false);
+      setShowModal(false);
+    }
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100 bg-dark text-white">
       <div className="container my-5 flex-grow-1 d-flex flex-column justify-content-center" style={{ paddingTop: '40px' }}>
@@ -126,6 +150,29 @@ const MovieDetailPage: React.FC<MovieDetailPageProps> = ({ user, favorites, setF
               />
               <div className="card-body">
                 <h1 className="card-title mb-4">{displayMovie.title || 'Title not available'}</h1>
+                {authUser && (
+                  <div className="flex flex-col items-start gap-2 mt-2">
+                    <div className="flex items-center gap-2">
+                      {/* @ts-ignore */}
+                      <Rating
+                        initialRating={rating || 0}
+                        onChange={handleRatingChange}
+                        emptySymbol={<FaRegStar className="text-3xl text-gray-600 transition-colors duration-150" />}
+                        fullSymbol={<FaStar className="text-3xl text-yellow-400 transition-colors duration-150" />}
+                        fractions={2}
+                        stop={10}
+                        readonly={loading}
+                      />
+                      {rating !== null && (
+                        <span className="text-xs text-gray-300 flex items-center gap-1 ml-2">
+                          {rating.toFixed(1)}
+                          <span className="text-yellow-400 text-sm">★</span>
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-xs text-gray-400">(Hover and click to rate)</span>
+                  </div>
+                )}
                 <div className="mb-4">
                   <Typography variant="body1"><strong>Release Date:</strong> {displayMovie.releaseDate || 'N/A'}</Typography>
                   <Typography variant="body1"><strong>Genre:</strong> {displayMovie.genre || 'N/A'}</Typography>

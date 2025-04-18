@@ -21,33 +21,18 @@ const FilmsPage: React.FC<FilmsPageProps> = ({ user }) => {
     fetchFilms();
   }, [user]);
 
-  const movieCardStyle: React.CSSProperties = {
-    width: '200px',
-    height: '300px',
-    borderRadius: '10px',
-    transition: 'transform 0.3s ease, border-color 0.3s ease',
-    display: 'block',
-    margin: '0 auto',
-    position: 'relative',
-    top: '0',
-  };
-
   return (
-    <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h1 className="my-5">My Films</h1>
-      <div className="container">
-        {films.length === 0 ? (
-          <p className="text-center" style={{ fontSize: '1.5rem' }}>Your films list is empty.</p>
-        ) : (
-          <div className="row">
-            {films.map((movie) => (
-              <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                <MovieCard movie={movie} style={movieCardStyle} isInFilms={true} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">
+      <h1 className="my-5 text-4xl font-bold text-white drop-shadow-lg">My Films</h1>
+      {films.length === 0 ? (
+        <p className="text-center text-xl text-gray-300">Your films list is empty.</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {films.map((movie) => (
+            <MovieCard key={movie.movie_id} movie={movie} style={{}} isInFilms={true} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

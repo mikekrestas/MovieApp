@@ -19,106 +19,41 @@ const Header: React.FC<HeaderProps> = ({ onSearch, user }) => {
   };
 
   return (
-    <header style={headerStyle}>
-      <div style={leftContainerStyle}>
-        <Link to="/" style={linkStyle}>
-          <FiHome style={iconStyle} />
-          Home
+    <header className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg bg-white/10 border-b border-white/10 shadow-lg flex items-center justify-between px-6 py-3">
+      <div className="flex items-center gap-4">
+        <Link to="/" className="flex items-center gap-1 px-3 py-2 rounded-xl border border-transparent hover:border-cyan-400 hover:bg-cyan-400/10 hover:shadow-md transition text-white font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          <FiHome className="text-xl" /> Home
         </Link>
-        <Link to="/favorites" style={linkStyle}>
-          <FiHeart style={iconStyle} />
-          Favorites
+        <Link to="/favorites" className="flex items-center gap-1 px-3 py-2 rounded-xl border border-transparent hover:border-cyan-400 hover:bg-cyan-400/10 hover:shadow-md transition text-white font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          <FiHeart className="text-xl" /> Favorites
         </Link>
       </div>
-      <form onSubmit={handleSearch} style={searchFormStyle}>
+      <form onSubmit={handleSearch} className="flex items-center bg-white/10 rounded-xl px-2 py-1 border border-white/10 shadow-inner shadow-gray-900/20 w-full max-w-md mx-6">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={searchInputStyle}
+          className="flex-grow bg-transparent outline-none text-white placeholder-gray-400 px-2 py-1"
           placeholder="Search..."
         />
-        <button type="submit" style={searchButtonStyle}>
+        <button type="submit" className="p-2 rounded-lg hover:bg-cyan-500 hover:text-white text-cyan-400 transition">
           <FaSearch />
         </button>
       </form>
-      <div style={rightContainerStyle}>
+      <div className="flex items-center gap-2">
         {user ? (
-          <Link to="/profile" style={linkStyle}>
-            <FiUser style={iconStyle} />
+          <Link to="/profile" className="flex items-center text-white hover:text-cyan-400 transition">
+            <FiUser className="text-xl" />
           </Link>
         ) : (
           <>
-            <Link to="/signup" style={linkStyle}>
-              Sign Up
-            </Link>
-            <Link to="/login" style={linkStyle}>
-              Login
-            </Link>
+            <Link to="/signup" className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white font-semibold transition shadow-md">Sign Up</Link>
+            <Link to="/login" className="px-4 py-2 rounded-xl bg-white/10 hover:bg-cyan-500 hover:text-white text-cyan-400 font-semibold transition shadow-md border border-cyan-400">Login</Link>
           </>
         )}
       </div>
     </header>
   );
-};
-
-const headerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '10px 20px',
-  backgroundColor: '#282c34',
-  color: 'white',
-  position: 'fixed',
-  top: 0,
-  width: '100%',
-  zIndex: 1000,
-};
-
-const leftContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-};
-
-const linkStyle: React.CSSProperties = {
-  color: 'white',
-  textDecoration: 'none',
-  margin: '0 10px',
-  display: 'flex',
-  alignItems: 'center',
-};
-
-const iconStyle: React.CSSProperties = {
-  marginRight: '5px',
-};
-
-const searchFormStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  flexGrow: 1,
-  maxWidth: '500px',
-  margin: '0 20px',
-};
-
-const searchInputStyle: React.CSSProperties = {
-  flexGrow: 1,
-  padding: '5px 10px',
-  borderRadius: '4px 0 0 4px',
-  border: '1px solid #ccc',
-};
-
-const searchButtonStyle: React.CSSProperties = {
-  padding: '5px 10px',
-  borderRadius: '0 4px 4px 0',
-  border: '1px solid #ccc',
-  borderLeft: 'none',
-  backgroundColor: '#61dafb',
-  cursor: 'pointer',
-};
-
-const rightContainerStyle: React.CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
 };
 
 export default Header;

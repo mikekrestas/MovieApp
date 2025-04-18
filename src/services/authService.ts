@@ -32,11 +32,9 @@ const validateMovie = (movie: Partial<Movie>): Movie => {
 
 export const addFavorite = async (userId: string, movie: Partial<Movie>) => {
   const validMovie = validateMovie(movie);
-  console.log('Adding favorite movie:', validMovie);
   try {
     const movieRef = doc(db, 'users', userId, 'favorites', validMovie.movie_id);
     await setDoc(movieRef, validMovie);
-    console.log('Movie added to favorites successfully.');
   } catch (error) {
     console.error('Error adding movie to favorites:', error);
   }
@@ -48,7 +46,6 @@ export const removeFavorite = async (userId: string, movieId: string) => {
 };
 
 export const getFavorites = async (userId: string): Promise<Movie[]> => {
-  console.log('Fetching favorites for user:', userId);
   try {
     const favoritesRef = collection(db, 'users', userId, 'favorites');
     const favoritesSnapshot = await getDocs(favoritesRef);
@@ -58,7 +55,6 @@ export const getFavorites = async (userId: string): Promise<Movie[]> => {
       favorites.push(doc.data() as Movie);
     });
 
-    console.log('Favorites fetched successfully:', favorites);
     return favorites;
   } catch (error) {
     console.error('Error fetching favorites:', error);
@@ -69,13 +65,10 @@ export const getFavorites = async (userId: string): Promise<Movie[]> => {
 // Function to add a movie to the watchlist
 export const addWatchlist = async (userId: string, movie: Partial<Movie>) => {
   const validMovie = validateMovie(movie);
-  console.log('Adding movie to watchlist:', validMovie);
   try {
     const movieRef = doc(db, 'users', userId, 'watchlist', validMovie.movie_id);
     await setDoc(movieRef, validMovie);
-    console.log('Movie added to watchlist successfully.');
   } catch (error) {
-    console.error('Error adding movie to watchlist:', error);
   }
 };
 
@@ -87,7 +80,6 @@ export const removeWatchlist = async (userId: string, movieId: string) => {
 
 // Function to get the watchlist
 export const getWatchlist = async (userId: string): Promise<Movie[]> => {
-  console.log('Fetching watchlist for user:', userId);
   try {
     const watchlistRef = collection(db, 'users', userId, 'watchlist');
     const snapshot = await getDocs(watchlistRef);
@@ -95,7 +87,6 @@ export const getWatchlist = async (userId: string): Promise<Movie[]> => {
     snapshot.forEach(doc => {
       movies.push(doc.data() as Movie);
     });
-    console.log('Watchlist fetched successfully:', movies);
     return movies;
   } catch (error) {
     console.error('Error fetching watchlist:', error);
@@ -105,11 +96,9 @@ export const getWatchlist = async (userId: string): Promise<Movie[]> => {
 
 export const addFilm = async (userId: string, movie: Partial<Movie>) => {
   const validMovie = validateMovie(movie);
-  console.log('Adding film:', validMovie);
   try {
     const movieRef = doc(db, 'users', userId, 'films', validMovie.movie_id);
     await setDoc(movieRef, validMovie);
-    console.log('Movie added to films successfully.');
   } catch (error) {
     console.error('Error adding movie to films:', error);
   }
@@ -121,7 +110,6 @@ export const removeFilm = async (userId: string, movieId: string) => {
 };
 
 export const getFilms = async (userId: string): Promise<Movie[]> => {
-  console.log('Fetching films for user:', userId);
   try {
     const filmsRef = collection(db, 'users', userId, 'films');
     const filmsSnapshot = await getDocs(filmsRef);
@@ -197,11 +185,7 @@ export const loginWithGoogle = async (): Promise<User | null> => {
   try {
     const result = await signInWithPopup(auth, provider);
     const user = result.user;
-    
-    // Log the user object and photoURL
-    console.log('Logged in User:', user);
-    console.log('Google User Photo URL:', user.photoURL);
-    
+        
     return user;
   } catch (error) {
     console.error('Error during Google login:', error);
@@ -231,4 +215,18 @@ export const updateProfilePicture = async (user: User, file: File): Promise<stri
   await firebaseUpdateProfile(user, { photoURL });
 
   return photoURL;
+};
+
+export const setRating = async (userId: string, movieId: string, rating: number) => {
+  const ratingRef = doc(db, 'users', userId, 'ratings', movieId);
+  await setDoc(ratingRef, { rating }, { merge: true });
+};
+
+export const getRating = async (userId: string, movieId: string): Promise<number | null> => {
+  const ratingRef = doc(db, 'users', userId, 'ratings', movieId);
+  const ratingSnap = await getDoc(ratingRef);
+  if (ratingSnap.exists()) {
+    return ratingSnap.data().rating ?? null;
+  }
+  return null;
 };

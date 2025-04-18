@@ -41,7 +41,6 @@ const languageMap: { [key: string]: string } = {
 
 // Transform the TMDB API movie response into your Movie type for now_playing endpoint
 const transformNowPlayingMovie = (tmdbMovie: any): Movie => {
-  console.log('TMDB Movie:', tmdbMovie); // Add this line to log the movie data
   return {
     movie_id: tmdbMovie.id.toString(),
     title: tmdbMovie.title || 'No Title',
@@ -60,7 +59,6 @@ const transformNowPlayingMovie = (tmdbMovie: any): Movie => {
 
 // Transform the TMDB API movie response into your Movie type for detailed movie endpoint
 const transformDetailedMovie = (tmdbMovie: any): Movie => {
-  console.log('TMDB Movie:', tmdbMovie); // Add this line to log the movie data
   return {
     movie_id: tmdbMovie.id.toString(),
     title: tmdbMovie.title || 'No Title',

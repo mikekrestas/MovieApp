@@ -13,13 +13,22 @@ def recommend():
     try:
         data = request.json
         favorite_movie_ids = data.get('favorite_movie_ids', [])
+        watched_movie_ids = data.get('watched_movie_ids', [])
+        watchlist_movie_ids = data.get('watchlist_movie_ids', [])
         num_recommendations = data.get('num_recommendations', 5)
 
-        if not favorite_movie_ids:
-            return jsonify({'error': 'No favorite movie IDs provided'}), 400
+        # Combine all excluded movie IDs
+        exclude_movie_ids = set(favorite_movie_ids) | set(watched_movie_ids) | set(watchlist_movie_ids)
 
-        print(f"Received favorite movie IDs: {favorite_movie_ids}")
-        recommendations = recommend_movies(favorite_movie_ids, num_recommendations)
+        print(f"Received favorite_movie_ids: {favorite_movie_ids}")
+        print(f"Received watched_movie_ids: {watched_movie_ids}")
+        print(f"Received watchlist_movie_ids: {watchlist_movie_ids}")
+
+        recommendations = recommend_movies(
+            favorite_movie_ids=favorite_movie_ids,
+            exclude_movie_ids=exclude_movie_ids,
+            num_recommendations=num_recommendations
+        )
         if not recommendations:
             print("No recommendations found.")
             return jsonify([])

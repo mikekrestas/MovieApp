@@ -25,34 +25,19 @@ const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
     fetchWatchlist();
   }, [user]);
 
-  const movieCardStyle: React.CSSProperties = {
-    width: '200px',
-    height: '300px',
-    borderRadius: '10px',
-    transition: 'transform 0.3s ease, border-color 0.3s ease',
-    display: 'block',
-    margin: '0 auto',
-    position: 'relative',
-    top: '0',
-  };
-
   return (
-    <div className="bg-dark text-white min-vh-100 d-flex flex-column align-items-center">
-      <h3 className="my-2"> </h3>
-      <h1 className="my-5">Watchlist</h1>
-      <div className="container">
-        {watchlist.length === 0 ? (
-          <p className="text-center" style={{ fontSize: '1.5rem' }}>Your watchlist is empty.</p>
-        ) : (
-          <div className="row">
-            {watchlist.map((movie) => (
-              <div key={movie.movie_id} className="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                <MovieCard movie={movie} style={movieCardStyle} isInFilms={films.some(film => film.movie_id === movie.movie_id)} />
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+    <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">
+      <h3 className="my-2"></h3>
+      <h1 className="my-5 text-4xl font-bold text-white drop-shadow-lg">Watchlist</h1>
+      {watchlist.length === 0 ? (
+        <p className="text-center text-xl text-gray-300">Your watchlist is empty.</p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {watchlist.map((movie) => (
+            <MovieCard key={movie.movie_id} movie={movie} style={{}} isInFilms={films.some(film => film.movie_id === movie.movie_id)} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
