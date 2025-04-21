@@ -92,7 +92,7 @@ const HomePage: React.FC<HomePageProps> = ({ user, favorites, setFavorites, movi
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">
-      <h1 className="my-4 pt-5 text-4xl font-bold text-white drop-shadow-lg">Latest Movies</h1>
+      <h1 className="my-3 pt-5 text-4xl font-bold text-white drop-shadow-lg">Latest Movies</h1>
       <div className="container pt-4">
         <div className="h-[500px] overflow-visible pb-8">
           <Slider {...settings}>
