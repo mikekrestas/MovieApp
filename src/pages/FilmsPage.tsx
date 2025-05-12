@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
 import { getFilms } from '../services/authService';
 import MovieCard from '../components/MovieCard';
 import { Movie } from '../types/types';
 import MovieFilterBar from '../components/MovieFilterBar';
 
 interface FilmsPageProps {
-  user: User | null;
+  userId: string;
+  readOnly?: boolean;
 }
 
-const FilmsPage: React.FC<FilmsPageProps> = ({ user }) => {
+const FilmsPage: React.FC<FilmsPageProps> = ({ userId, readOnly }) => {
   const [films, setFilms] = useState<Movie[]>([]);
   const [filter, setFilter] = useState({
     search: '',
@@ -26,13 +26,13 @@ const FilmsPage: React.FC<FilmsPageProps> = ({ user }) => {
 
   useEffect(() => {
     const fetchFilms = async () => {
-      if (user) {
-        const movies = await getFilms(user.uid);
+      if (userId) {
+        const movies = await getFilms(userId);
         setFilms(movies);
       }
     };
     fetchFilms();
-  }, [user]);
+  }, [userId]);
 
   const getUnique = (arr: string[]) => Array.from(new Set(arr)).filter(Boolean).sort();
   const getGenres = (movies: Movie[]) => getUnique(movies.flatMap(m => m.genre?.split(',').map(g => g.trim()) || []));
@@ -119,7 +119,7 @@ const FilmsPage: React.FC<FilmsPageProps> = ({ user }) => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">
-      <h1 className="my-3 text-4xl font-bold text-white drop-shadow-lg">My Films</h1>
+      <h1 className="my-3 text-4xl font-bold text-white drop-shadow-lg">Films</h1>
       <div className="w-full max-w-6xl px-4">
         <MovieFilterBar
           genres={getGenres(films)}

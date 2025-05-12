@@ -1,10 +1,9 @@
 // src/services/authService.ts
 import { auth, db, storage } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, UserCredential, GoogleAuthProvider, signInWithPopup, User, updateProfile as firebaseUpdateProfile } from 'firebase/auth';
-import { doc, setDoc, collection, getDocs, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, collection, getDocs, getDoc, deleteDoc, addDoc, query, orderBy, where } from 'firebase/firestore';
 import { Movie } from '../types/types';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-
 
 const validateMovie = (movie: Partial<Movie>): Movie => {
   if (!movie.movie_id || movie.movie_id.trim() === '') {
@@ -137,6 +136,17 @@ const checkUserExists = async (username: string, email: string) => {
 };
 
 export const signUp = async (username: string, email: string, password: string): Promise<UserCredential> => {
+  // Username uniqueness check (case-insensitive)
+  const usersRef = collection(db, 'users');
+  const q = query(usersRef, where('username', '==', username.trim().toLowerCase()));
+  const snapshot = await getDocs(q);
+  if (!username.match(/^[a-z0-9_]{3,20}$/)) {
+    throw new Error('Username must be 3-20 characters, lowercase letters, numbers, or underscores.');
+  }
+  if (!snapshot.empty) {
+    throw new Error('Username already taken. Please choose another one.');
+  }
+  // Email uniqueness check (existing logic)
   const { userExists, emailExists } = await checkUserExists(username, email);
 
   if (userExists) {
@@ -229,4 +239,192 @@ export const getRating = async (userId: string, movieId: string): Promise<number
     return ratingSnap.data().rating ?? null;
   }
   return null;
+};
+
+// --- Reviews ---
+export interface Review {
+  userId: string;
+  username: string;
+  movieId: string;
+  reviewText: string;
+  timestamp: number;
+  reactions?: Record<string, string[]>;
+  id?: string;
+}
+
+export const addReview = async (movieId: string, review: Review) => {
+  try {
+    const reviewsRef = collection(db, 'movies', movieId, 'reviews');
+    await addDoc(reviewsRef, review);
+  } catch (error) {
+    console.error('Error adding review:', error);
+    throw error;
+  }
+};
+
+export const getReviews = async (movieId: string): Promise<Review[]> => {
+  try {
+    const reviewsRef = collection(db, 'movies', movieId, 'reviews');
+    const q = query(reviewsRef, orderBy('timestamp', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as Review);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    return [];
+  }
+};
+
+export const reactToReview = async (movieId: string, reviewId: string, emoji: string, userId: string) => {
+  try {
+    const reviewRef = doc(db, 'movies', movieId, 'reviews', reviewId);
+    const reviewSnap = await getDoc(reviewRef);
+    if (!reviewSnap.exists()) return;
+    const review = reviewSnap.data() as Review;
+    const reactions = { ...(review.reactions || {}) };
+    const users = new Set(reactions[emoji] || []);
+    if (users.has(userId)) {
+      users.delete(userId); // remove reaction
+    } else {
+      users.add(userId); // add reaction
+    }
+    reactions[emoji] = Array.from(users);
+    await setDoc(reviewRef, { reactions }, { merge: true });
+  } catch (error) {
+    console.error('Error reacting to review:', error);
+    throw error;
+  }
+};
+
+export const deleteReview = async (movieId: string, reviewId: string) => {
+  try {
+    const reviewRef = doc(db, 'movies', movieId, 'reviews', reviewId);
+    await deleteDoc(reviewRef);
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    throw error;
+  }
+};
+
+// --- Buddy System ---
+export interface BuddyRequest {
+  from: string; // userId
+  fromUsername?: string; // sender's username
+  to: string;   // userId
+  status: 'pending' | 'accepted' | 'rejected';
+  timestamp: number;
+  id?: string;
+}
+
+export interface Buddy {
+  userId: string;
+  since: number;
+}
+
+export interface UserProfile {
+  userId: string;
+  username: string;
+  email: string;
+  photoURL?: string;
+}
+
+// Search users by username (case-insensitive, partial match)
+export const searchUsersByUsername = async (query: string, excludeUserId?: string): Promise<UserProfile[]> => {
+  const usersRef = collection(db, 'users');
+  const snapshot = await getDocs(usersRef);
+  return snapshot.docs
+    .map(doc => ({ userId: doc.id, ...doc.data() } as UserProfile))
+    .filter(u =>
+      u.username &&
+      u.username.toLowerCase().includes(query.toLowerCase()) &&
+      (!excludeUserId || u.userId !== excludeUserId)
+    );
+};
+
+// Send a buddy request
+export const sendBuddyRequest = async (from: string, to: string) => {
+  // Fetch sender's username
+  const fromUserDoc = await getDoc(doc(db, 'users', from));
+  const fromUsername = fromUserDoc.exists() ? fromUserDoc.data().username : undefined;
+  const req: BuddyRequest = { from, fromUsername, to, status: 'pending', timestamp: Date.now() };
+  const reqRef = collection(db, 'users', to, 'buddyRequests');
+  await addDoc(reqRef, req);
+  // Add notification
+  await addNotification(to, {
+    type: 'buddy_request',
+    from,
+    fromUsername,
+    to,
+    timestamp: Date.now(),
+    status: 'pending',
+    read: false,
+  });
+};
+
+// Accept a buddy request
+export const acceptBuddyRequest = async (userId: string, requestId: string, from: string) => {
+  // Update request status
+  const reqRef = doc(db, 'users', userId, 'buddyRequests', requestId);
+  await setDoc(reqRef, { status: 'accepted' }, { merge: true });
+  // Add each other as buddies
+  const now = Date.now();
+  await setDoc(doc(db, 'users', userId, 'buddies', from), { userId: from, since: now });
+  await setDoc(doc(db, 'users', from, 'buddies', userId), { userId, since: now });
+  // Mark notification as read
+  await markNotificationAsRead(userId, requestId);
+};
+
+// Reject a buddy request
+export const rejectBuddyRequest = async (userId: string, requestId: string) => {
+  const reqRef = doc(db, 'users', userId, 'buddyRequests', requestId);
+  await setDoc(reqRef, { status: 'rejected' }, { merge: true });
+  await markNotificationAsRead(userId, requestId);
+};
+
+// Get buddies for a user
+export const getBuddies = async (userId: string): Promise<Buddy[]> => {
+  const buddiesRef = collection(db, 'users', userId, 'buddies');
+  const snapshot = await getDocs(buddiesRef);
+  return snapshot.docs.map(doc => doc.data() as Buddy);
+};
+
+// Get pending buddy requests for a user
+export const getBuddyRequests = async (userId: string): Promise<BuddyRequest[]> => {
+  const reqRef = collection(db, 'users', userId, 'buddyRequests');
+  const snapshot = await getDocs(reqRef);
+  return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as BuddyRequest).filter(r => r.status === 'pending');
+};
+
+// Remove a buddy
+export const removeBuddy = async (userId: string, buddyId: string) => {
+  // Remove from both users' buddies collections
+  await deleteDoc(doc(db, 'users', userId, 'buddies', buddyId));
+  await deleteDoc(doc(db, 'users', buddyId, 'buddies', userId));
+};
+
+// --- Notifications ---
+export interface Notification {
+  type: 'buddy_request';
+  from: string;
+  fromUsername?: string; // sender's username
+  to: string;
+  timestamp: number;
+  status: 'pending' | 'accepted' | 'rejected';
+  read: boolean;
+  id?: string;
+}
+
+export const addNotification = async (userId: string, notification: Notification) => {
+  const notifRef = collection(db, 'users', userId, 'notifications');
+  await addDoc(notifRef, notification);
+};
+
+export const getNotifications = async (userId: string): Promise<Notification[]> => {
+  const notifRef = collection(db, 'users', userId, 'notifications');
+  const snapshot = await getDocs(notifRef);
+  return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }) as Notification);
+};
+
+export const markNotificationAsRead = async (userId: string, notificationId: string) => {
+  const notifRef = doc(db, 'users', userId, 'notifications', notificationId);
+  await setDoc(notifRef, { read: true }, { merge: true });
 };

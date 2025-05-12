@@ -9,9 +9,9 @@ interface MovieFilterBarProps {
     search: string;
     genres: string[];
     decade: string;
-    yearRange: [number, number];
-    imdbRating: [number, number];
-    runtime: [number, number];
+    yearRange: [number | null, number | null];
+    imdbRating: [number | null, number | null];
+    runtime: [number | null, number | null];
     country: string;
     language: string;
     director: string;
@@ -133,7 +133,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                     type="number"
                     min="1900"
                     max="2100"
-                    value={filter.yearRange[0]}
+                    value={filter.yearRange[0] ?? ''}
                     onChange={e => onFilterChange({ ...filter, yearRange: [Number(e.target.value), filter.yearRange[1]] })}
                     className="w-14 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                   />
@@ -142,7 +142,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                     type="number"
                     min="1900"
                     max="2100"
-                    value={filter.yearRange[1]}
+                    value={filter.yearRange[1] ?? ''}
                     onChange={e => onFilterChange({ ...filter, yearRange: [filter.yearRange[0], Number(e.target.value)] })}
                     className="w-14 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                   />
@@ -200,7 +200,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                   min="0"
                   max="10"
                   step="0.1"
-                  value={filter.imdbRating[0]}
+                  value={filter.imdbRating[0] ?? ''}
                   onChange={e => onFilterChange({ ...filter, imdbRating: [Number(e.target.value), filter.imdbRating[1]] })}
                   className="w-12 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                 />
@@ -210,7 +210,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                   min="0"
                   max="10"
                   step="0.1"
-                  value={filter.imdbRating[1]}
+                  value={filter.imdbRating[1] ?? ''}
                   onChange={e => onFilterChange({ ...filter, imdbRating: [filter.imdbRating[0], Number(e.target.value)] })}
                   className="w-12 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                 />
@@ -224,7 +224,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                   type="number"
                   min="0"
                   max="500"
-                  value={filter.runtime[0]}
+                  value={filter.runtime[0] ?? ''}
                   onChange={e => onFilterChange({ ...filter, runtime: [Number(e.target.value), filter.runtime[1]] })}
                   className="w-12 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                 />
@@ -233,7 +233,7 @@ const MovieFilterBar: React.FC<MovieFilterBarProps> = ({
                   type="number"
                   min="0"
                   max="500"
-                  value={filter.runtime[1]}
+                  value={filter.runtime[1] ?? ''}
                   onChange={e => onFilterChange({ ...filter, runtime: [filter.runtime[0], Number(e.target.value)] })}
                   className="w-12 px-2 py-1 rounded-lg border border-cyan-400 bg-gray-900/80 text-cyan-200 text-xs shadow"
                 />

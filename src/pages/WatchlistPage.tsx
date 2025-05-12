@@ -1,16 +1,16 @@
 // src/pages/WatchlistPage.tsx
 import React, { useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
 import { getWatchlist, getFilms } from '../services/authService';
 import MovieCard from '../components/MovieCard';
 import { Movie } from '../types/types';
 import MovieFilterBar from '../components/MovieFilterBar';
 
 interface WatchlistPageProps {
-  user: User | null;
+  userId: string;
+  readOnly?: boolean;
 }
 
-const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
+const WatchlistPage: React.FC<WatchlistPageProps> = ({ userId, readOnly }) => {
   const [watchlist, setWatchlist] = useState<Movie[]>([]);
   const [films, setFilms] = useState<Movie[]>([]);
   const [filter, setFilter] = useState({
@@ -111,15 +111,15 @@ const WatchlistPage: React.FC<WatchlistPageProps> = ({ user }) => {
 
   useEffect(() => {
     const fetchWatchlist = async () => {
-      if (user) {
-        const movies = await getWatchlist(user.uid);
+      if (userId) {
+        const movies = await getWatchlist(userId);
         setWatchlist(movies);
-        const films = await getFilms(user.uid);
+        const films = await getFilms(userId);
         setFilms(films);
       }
     };
     fetchWatchlist();
-  }, [user]);
+  }, [userId]);
 
   return (
     <div className="bg-gradient-to-br from-gray-900 via-gray-950 to-gray-800 min-h-screen pt-24 flex flex-col items-center">

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import { logout } from '../services/authService';
+import { logout, getFilms } from '../services/authService';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { Movie } from '../types/types';
 
 interface ProfilePageProps {
   user: User | null;
@@ -12,6 +13,7 @@ interface ProfilePageProps {
 const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState<string | null>(null);
+  const [films, setFilms] = useState<Movie[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -22,6 +24,9 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
           const userData = userDoc.data();
           setUsername(userData?.username || null);
         }
+        // Fetch user's films
+        const movies = await getFilms(user.uid);
+        setFilms(movies);
       }
     };
     fetchUserData();
@@ -70,6 +75,13 @@ const ProfilePage: React.FC<ProfilePageProps> = ({ user }) => {
                 >
                   <span className="text-2xl mb-1"><i className="fa-solid fa-film"></i></span>
                   Films
+                </button>
+                <button
+                  className="flex-1 flex flex-col items-center justify-center rounded-xl bg-cyan-500 hover:bg-cyan-400 text-white font-semibold py-4 shadow-lg shadow-cyan-900/30 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+                  onClick={() => navigate('/buddies')}
+                >
+                  <span className="text-2xl mb-1"><i className="fa-solid fa-user-group"></i></span>
+                  Buddies
                 </button>
               </div>
               <button

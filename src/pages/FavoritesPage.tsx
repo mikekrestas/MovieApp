@@ -1,19 +1,19 @@
 import React from 'react';
 import { Movie } from '../types/types';
 import MovieCard from '../components/MovieCard';
-import { User } from 'firebase/auth';
+import { getFavorites, getFilms } from '../services/authService';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../index.css';
 import MovieFilterBar from '../components/MovieFilterBar';
 
 interface FavoritesPageProps {
-  user: User | null;
-  favorites: Movie[];
-  setFavorites: (movies: Movie[]) => void;
-  films: Movie[];
+  userId: string;
+  readOnly?: boolean;
 }
 
-const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavorites, films }) => {
+const FavoritesPage: React.FC<FavoritesPageProps> = ({ userId, readOnly }) => {
+  const [favorites, setFavorites] = React.useState<Movie[]>([]);
+  const [films, setFilms] = React.useState<Movie[]>([]);
   const [filter, setFilter] = React.useState({
     search: '',
     genres: [] as string[],
@@ -26,6 +26,18 @@ const FavoritesPage: React.FC<FavoritesPageProps> = ({ user, favorites, setFavor
     director: '',
     sort: 'title',
   });
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      if (userId) {
+        const favs = await getFavorites(userId);
+        setFavorites(favs);
+        const filmsList = await getFilms(userId);
+        setFilms(filmsList);
+      }
+    };
+    fetchData();
+  }, [userId]);
 
   const getUnique = (arr: string[]) => Array.from(new Set(arr)).filter(Boolean).sort();
   const getGenres = (movies: Movie[]) => getUnique(movies.flatMap(m => m.genre?.split(',').map(g => g.trim()) || []));

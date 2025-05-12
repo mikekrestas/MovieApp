@@ -3,25 +3,34 @@ import { TextField, Button, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchBarProps {
-  onSearch: (query: string) => void;
+  onSearch: (query: string, type: 'movie' | 'user') => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
   const [query, setQuery] = useState('');
-  const navigate = useNavigate(); // Initialize useNavigate
+  const [searchType, setSearchType] = useState<'movie' | 'user'>('movie');
+  const navigate = useNavigate();
 
   const handleSearch = () => {
     if (query) {
-      onSearch(query); // Call the onSearch function
-      navigate('/search'); // Navigate to the search results page
+      onSearch(query, searchType);
+      navigate('/search');
     }
   };
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+      <select
+        value={searchType}
+        onChange={e => setSearchType(e.target.value as 'movie' | 'user')}
+        style={{ marginRight: 12, padding: '8px 12px', borderRadius: 6, border: '1px solid #ccc', background: '#fff', color: '#333' }}
+      >
+        <option value="movie">Movies</option>
+        <option value="user">Users</option>
+      </select>
       <TextField
         variant="outlined"
-        placeholder="Search for a movie..."
+        placeholder={searchType === 'movie' ? 'Search for a movie...' : 'Search for a user...'}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         sx={{ mr: 2 }}
