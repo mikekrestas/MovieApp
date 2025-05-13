@@ -6,7 +6,7 @@ import { User } from 'firebase/auth';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../index.css';
 import MovieFilterBar from '../components/MovieFilterBar';
-import { sendBuddyRequest } from '../services/authService';
+import { sendBuddyRequest, cancelBuddyRequest } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchResultsPageProps {
@@ -33,11 +33,29 @@ const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ user, searchResul
 
   // Add buddy request state
   const [buddyRequestSent, setBuddyRequestSent] = React.useState<{ [userId: string]: boolean }>({});
+  const [buddies, setBuddies] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    const fetchBuddies = async () => {
+      if (!user) return;
+      // Import getBuddies dynamically to avoid circular import
+      const { getBuddies } = await import('../services/authService');
+      const buddyList = await getBuddies(user.uid);
+      setBuddies(buddyList.map(b => b.userId));
+    };
+    if (searchType === 'user' && user) fetchBuddies();
+  }, [user, searchType]);
 
   const handleAddBuddy = async (buddyId: string) => {
     if (!user) return;
     await sendBuddyRequest(user.uid, buddyId);
     setBuddyRequestSent(prev => ({ ...prev, [buddyId]: true }));
+  };
+
+  const handleCancelRequest = async (buddyId: string) => {
+    if (!user) return;
+    await cancelBuddyRequest(user.uid, buddyId);
+    setBuddyRequestSent(prev => ({ ...prev, [buddyId]: false }));
   };
 
   const getUnique = (arr: string[]) => Array.from(new Set(arr)).filter(Boolean).sort();
@@ -136,25 +154,42 @@ const SearchResultsPage: React.FC<SearchResultsPageProps> = ({ user, searchResul
           {userResults.length === 0 ? (
             <p className="text-center text-xl text-gray-300 col-span-full">No users found.</p>
           ) : (
-            userResults.map((u) => (
-              <div key={u.userId} className="flex flex-col items-center bg-gray-900/80 rounded-xl p-4 border border-cyan-700 shadow">
-                <img
-                  src={u.photoURL || 'https://via.placeholder.com/100'}
-                  alt={u.username}
-                  className="w-20 h-20 rounded-full mb-2 object-cover border-2 border-cyan-400"
-                />
-                <div className="font-semibold text-white mb-2 cursor-pointer hover:underline" onClick={() => navigate(`/profile/${u.userId}`)}>
-                  {u.username}
+            userResults.map((u) => {
+              const isBuddy = user && buddies.includes(u.userId);
+              return (
+                <div key={u.userId} className="flex flex-col items-center bg-gray-900/80 rounded-xl p-4 border border-cyan-700 shadow min-h-[220px] justify-between">
+                  <img
+                    src={u.photoURL || 'https://via.placeholder.com/100'}
+                    alt={u.username}
+                    className="w-20 h-20 rounded-full mb-2 object-cover border-2 border-cyan-400"
+                  />
+                  <div className="font-semibold text-white mb-2 cursor-pointer hover:underline" onClick={() => navigate(`/profile/${u.userId}`)}>
+                    {u.username}
+                  </div>
+                  {user && user.uid !== u.userId && (
+                    isBuddy ? (
+                      <div className="px-3 py-1 rounded font-semibold text-xs bg-cyan-700 text-white w-[110px] text-center select-none">Buddies</div>
+                    ) : !buddyRequestSent[u.userId] ? (
+                      <button
+                        className="px-3 py-1 rounded font-semibold text-xs bg-green-500 hover:bg-green-400 text-white w-[110px] transition-all duration-100"
+                        style={{ minHeight: 32 }}
+                        onClick={() => handleAddBuddy(u.userId)}
+                      >
+                        Add Buddy
+                      </button>
+                    ) : (
+                      <button
+                        className="px-3 py-1 rounded font-semibold text-xs bg-gray-500 hover:bg-gray-400 text-white w-[110px] transition-all duration-100"
+                        style={{ minHeight: 32 }}
+                        onClick={() => handleCancelRequest(u.userId)}
+                      >
+                        Cancel Request
+                      </button>
+                    )
+                  )}
                 </div>
-                <button
-                  className={`px-3 py-1 rounded font-semibold text-xs ${buddyRequestSent[u.userId] ? 'bg-gray-500 text-white cursor-not-allowed' : 'bg-green-500 hover:bg-green-400 text-white'}`}
-                  onClick={() => handleAddBuddy(u.userId)}
-                  disabled={buddyRequestSent[u.userId]}
-                >
-                  {buddyRequestSent[u.userId] ? 'Request Sent' : 'Add Buddy'}
-                </button>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

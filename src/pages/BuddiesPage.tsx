@@ -53,7 +53,7 @@ const BuddiesPage: React.FC<BuddiesPageProps> = ({ userId, readOnly }) => {
                 className="w-20 h-20 rounded-full mb-2 object-cover border-2 border-cyan-400"
               />
               <div className="font-semibold text-white mb-1">{buddy.username}</div>
-              <div className="text-xs text-cyan-300">{buddy.email}</div>
+              
               {!readOnly && (
                 <button
                   className="absolute top-2 right-2 px-2 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-xs font-semibold shadow"

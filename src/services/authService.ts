@@ -347,17 +347,33 @@ export const sendBuddyRequest = async (from: string, to: string) => {
   const fromUsername = fromUserDoc.exists() ? fromUserDoc.data().username : undefined;
   const req: BuddyRequest = { from, fromUsername, to, status: 'pending', timestamp: Date.now() };
   const reqRef = collection(db, 'users', to, 'buddyRequests');
-  await addDoc(reqRef, req);
-  // Add notification
-  await addNotification(to, {
-    type: 'buddy_request',
-    from,
-    fromUsername,
-    to,
-    timestamp: Date.now(),
-    status: 'pending',
-    read: false,
+  // Check if a pending request already exists
+  const snapshot = await getDocs(reqRef);
+  const existingReq = snapshot.docs.find(doc => {
+    const data = doc.data();
+    return data.from === from && data.to === to && data.status === 'pending';
   });
+  if (!existingReq) {
+    await addDoc(reqRef, req);
+    // Add notification only if not already present
+    const notifRef = collection(db, 'users', to, 'notifications');
+    const notifSnap = await getDocs(notifRef);
+    const existingNotif = notifSnap.docs.find(doc => {
+      const data = doc.data();
+      return data.type === 'buddy_request' && data.from === from && data.to === to && data.status === 'pending';
+    });
+    if (!existingNotif) {
+      await addDoc(notifRef, {
+        type: 'buddy_request',
+        from,
+        fromUsername,
+        to,
+        timestamp: Date.now(),
+        status: 'pending',
+        read: false,
+      });
+    }
+  }
 };
 
 // Accept a buddy request
@@ -378,6 +394,30 @@ export const rejectBuddyRequest = async (userId: string, requestId: string) => {
   const reqRef = doc(db, 'users', userId, 'buddyRequests', requestId);
   await setDoc(reqRef, { status: 'rejected' }, { merge: true });
   await markNotificationAsRead(userId, requestId);
+};
+
+// Cancel a buddy request (remove the pending request sent by 'from' to 'to')
+export const cancelBuddyRequest = async (from: string, to: string) => {
+  // Find the pending request from 'from' to 'to'
+  const reqRef = collection(db, 'users', to, 'buddyRequests');
+  const snapshot = await getDocs(reqRef);
+  const reqDoc = snapshot.docs.find(doc => {
+    const data = doc.data();
+    return data.from === from && data.to === to && data.status === 'pending';
+  });
+  if (reqDoc) {
+    await deleteDoc(doc(db, 'users', to, 'buddyRequests', reqDoc.id));
+  }
+  // Also remove the corresponding notification
+  const notifRef = collection(db, 'users', to, 'notifications');
+  const notifSnap = await getDocs(notifRef);
+  const notifDoc = notifSnap.docs.find(doc => {
+    const data = doc.data();
+    return data.type === 'buddy_request' && data.from === from && data.to === to && data.status === 'pending';
+  });
+  if (notifDoc) {
+    await deleteDoc(doc(db, 'users', to, 'notifications', notifDoc.id));
+  }
 };
 
 // Get buddies for a user
