@@ -1,4 +1,4 @@
-# Getting Started with Create React App
+# MovieApp is a way for film enthusiasts to track, rate, and review movies and also get tailored movie recommendations.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
